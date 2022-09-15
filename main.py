@@ -1,10 +1,12 @@
 from bot.helper import dp
 from aiogram import executor
 from bot.handlers.user import register_user
+from database.main_db import db_start
 
 
 async def on_startup(_):
     print('Bot went online!')
+    await db_start()
 
 register_user(dp)
 
