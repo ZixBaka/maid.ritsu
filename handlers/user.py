@@ -5,7 +5,6 @@ from aiogram.dispatcher import FSMContext
 from bot.keyboards.user_register_inline import inline_go_kb, inline_additional_confirm, contact
 from bot.filters.valid_number import is_valid
 from bot.database.main_db import insert_new_db
-from aiogram.types import ReplyKeyboardRemove
 
 
 class FsmRegister(StatesGroup):
