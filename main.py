@@ -1,9 +1,12 @@
 from bot.helper import dp
 from aiogram import executor
+from bot.handlers.user import register_user
 
 
 async def on_startup(_):
     print('Bot went online!')
+
+register_user(dp)
 
 
 if __name__ == '__main__':
