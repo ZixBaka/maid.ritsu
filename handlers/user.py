@@ -4,7 +4,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from bot.keyboards.user_register_inline import inline_go_kb, inline_additional_confirm, contact
 from bot.filters.valid_number import is_valid
-from bot.database.main_db import insert_new_db
+from bot.database.main_db import insert_new_db, check_user_db
+from aiogram.types import ReplyKeyboardRemove
+from asyncio import gather
 
 
 class FsmRegister(StatesGroup):
@@ -14,11 +16,19 @@ class FsmRegister(StatesGroup):
     phone = State()
 
 
+async def extra_request(msg: Message):
+    await msg.answer('👍Awesome, do you want to add extra car?', reply_markup=inline_additional_confirm)
+
+
 async def start_msg(msg: Message):
-    hello_text = f"🇬🇧Hello <i>{msg.from_user.first_name}</i>!\n" \
-                 f"This bot will help you to find owner of parked car🚘\n" \
-                 f"<b>Let's register together!</b>"
-    await msg.answer(hello_text, parse_mode=ParseMode.HTML, reply_markup=inline_go_kb)
+    await (answer := gather(check_user_db(msg.from_user.id)))
+    if answer is False:
+        hello_text = f"🇬🇧Hello <i>{msg.from_user.first_name}</i>!\n" \
+                     f"This bot will help you to find owner of parked car🚘\n" \
+                     f"<b>Let's register together!</b>"
+        await msg.answer(hello_text, parse_mode=ParseMode.HTML, reply_markup=inline_go_kb)
+    else:
+        await msg.answer(f'Hi {msg.from_user.first_name}')
 
 
 async def register_start(callback: CallbackQuery):
@@ -30,25 +40,33 @@ async def register_start(callback: CallbackQuery):
 
 async def first_number(msg: Message, state=FSMContext):
     async with state.proxy() as data:
-        data['main'] = msg.text
+        data['main'] = msg.text.upper()
         data['extra'] = None
         data['extra2'] = None
         data['contact'] = None
-    await msg.answer('👍Awesome, do you want to add extra car?', reply_markup=inline_additional_confirm)
+    await extra_request(msg)
 
 
 # finishes registration
-async def write_data(msg: Message, state=FSMContext, number=None):
+async def write_data(msg: Message, state=FSMContext):
     async with state.proxy() as data:
-        data['contact'] = number
-        await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
-    await msg.answer(f'🥳Your data were saved successfully\n'
-                     f'🚙Your car number(s):\n'
-                     f'<code>{data["main"]}</code>'
-                     f'<code>{" " + x if (x := data["extra"]) is not None else ""}</code>'
-                     f'<code>{" " + y if (y := data["extra2"]) is not None else ""}</code>\n'
-                     f'Your contact: <i>{data["contact"]}</i>',
-                     parse_mode=ParseMode.HTML)
+        try:
+            data['contact'] = msg.contact.phone_number
+        except AttributeError:
+            pass
+        finally:
+            try:
+                await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
+                await msg.answer(f'🥳Your data were saved successfully\n'
+                                 f'🚙Your car number(s):\n'
+                                 f'<code>{data["main"]}</code>'
+                                 f'<code>{" " + x if (x := data["extra"]) is not None else ""}</code>'
+                                 f'<code>{" " + y if (y := data["extra2"]) is not None else ""}</code>\n'
+                                 f'Your contact: <i>{data["contact"]}</i>',
+                                 parse_mode=ParseMode.HTML,
+                                 reply_markup=ReplyKeyboardRemove())
+            except Exception:
+                await msg.answer('Something went wrong :/')
     await state.finish()
 
 
@@ -61,9 +79,6 @@ async def enter_phone(callback: CallbackQuery):
     await callback.answer()
 
 
-async def number_get(msg: Message):
-    await write_data(msg, number=msg.contact.phone_number)
-
 """Extra number's section"""
 
 
@@ -71,6 +86,22 @@ async def number_get(msg: Message):
 async def extra_info(callback: CallbackQuery):
     await callback.message.delete()
     await callback.message.answer('🤑Alright rich guy/ lady, send me another one')
+    await FsmRegister.next()
+
+
+async def extra_first(msg: Message, state=FSMContext):
+    async with state.proxy() as data:
+        data['extra'] = msg.text
+    await extra_request(msg)
+
+
+# extra 2
+async def extra_second(msg: Message, state=FSMContext):
+    async with state.proxy() as data:
+        data['extra2'] = msg.text
+    await FsmRegister.phone.set()
+    await msg.answer('📞Nice, I need your contact (Optional)',
+                     reply_markup=contact)
 
 
 def register_user(dp: Dispatcher):
@@ -85,5 +116,14 @@ def register_user(dp: Dispatcher):
     # phone
     dp.register_message_handler(write_data, state=FsmRegister.phone,
                                 text='🙅‍♂️I prefer not to report it')
-    dp.register_message_handler(number_get, state=FsmRegister.phone, content_types='contact')
+    dp.register_message_handler(write_data, state=FsmRegister.phone, content_types='contact')
     # extra numbers
+    dp.register_callback_query_handler(extra_info,
+                                       state=[FsmRegister.main_number, FsmRegister.phone], text='extra')
+    # extra 1
+    dp.register_message_handler(extra_first, lambda msg: is_valid(msg.text),
+                                state=FsmRegister.extra)
+    # extra 2
+    dp.register_callback_query_handler(extra_info, state=FsmRegister.extra, text='extra')
+    dp.register_message_handler(extra_second, lambda msg: is_valid(msg.text),
+                                state=FsmRegister.extra2)
