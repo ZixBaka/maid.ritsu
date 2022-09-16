@@ -38,9 +38,18 @@ async def first_number(msg: Message, state=FSMContext):
 
 
 # finishes registration
-async def write_data(msg: Message, state=FSMContext):
+async def write_data(msg: Message, state=FSMContext, number=None):
     async with state.proxy() as data:
+        data['contact'] = number
         await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
+    await msg.answer(f'🥳Your data were saved successfully\n'
+                     f'🚙Your car number(s):\n'
+                     f'<code>{data["main"]}</code>'
+                     f'<code>{" " + x if (x := data["extra"]) is not None else ""}</code>'
+                     f'<code>{" " + y if (y := data["extra2"]) is not None else ""}</code>\n'
+                     f'Your contact: <i>{data["contact"]}</i>',
+                     parse_mode=ParseMode.HTML)
+    await state.finish()
 
 
 # contact get
@@ -52,10 +61,8 @@ async def enter_phone(callback: CallbackQuery):
     await callback.answer()
 
 
-async def number_get(msg: Message, state=FSMContext):
-    async with state.proxy() as data:
-        data['contact'] = msg.contact.phone_number
-    await write_data(msg)
+async def number_get(msg: Message):
+    await write_data(msg, number=msg.contact.phone_number)
 
 """Extra number's section"""
 
@@ -73,7 +80,7 @@ def register_user(dp: Dispatcher):
     dp.register_message_handler(first_number,
                                 lambda msg: is_valid(msg.text),
                                 state=FsmRegister.main_number)
-    # confirm handle
+    # confirm / reject handle
     dp.register_callback_query_handler(enter_phone, state=FsmRegister, text='no_extra')
     # phone
     dp.register_message_handler(write_data, state=FsmRegister.phone,
