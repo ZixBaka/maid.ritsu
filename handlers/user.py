@@ -30,7 +30,7 @@ async def start_msg(msg: Message, state=FSMContext):
         await msg.answer(hello_text, parse_mode=ParseMode.HTML, reply_markup=inline_go_kb)
     else:
         await state.finish()
-        await msg.answer(f'Hi {msg.from_user.first_name}')
+        await msg.answer(f'Hi {msg.from_user.first_name}✋')
 
 
 async def register_again(msg: Message):
