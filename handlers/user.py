@@ -21,7 +21,7 @@ async def extra_request(msg: Message):
     await msg.answer('👍Awesome, do you want to add extra car?', reply_markup=inline_additional_confirm)
 
 
-async def start_msg(msg: Message):
+async def start_msg(msg: Message, state=FSMContext):
     await (answer := gather(check_user_db(msg.from_user.id)))
     if answer.result()[0] is False:
         hello_text = f"🇬🇧Hello <i>{msg.from_user.first_name}</i>!\n" \
@@ -29,6 +29,7 @@ async def start_msg(msg: Message):
                      f"<b>Let's register together!</b>"
         await msg.answer(hello_text, parse_mode=ParseMode.HTML, reply_markup=inline_go_kb)
     else:
+        await state.finish()
         await msg.answer(f'Hi {msg.from_user.first_name}')
 
 
@@ -106,6 +107,10 @@ async def extra_second(msg: Message, state=FSMContext):
                      reply_markup=contact)
 
 
+async def error_2(msg: Message):
+    await msg.answer('⚠️Please write your data properly')
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(start_msg, commands=['start', 'restart'],
                                 state='*')
@@ -131,3 +136,4 @@ def register_user(dp: Dispatcher):
     dp.register_callback_query_handler(extra_info, state=FsmRegister.extra, text='extra')
     dp.register_message_handler(extra_second, lambda msg: is_valid(msg.text),
                                 state=FsmRegister.extra2)
+    dp.register_message_handler(error_2, state=FsmRegister.states)
