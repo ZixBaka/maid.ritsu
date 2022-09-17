@@ -11,7 +11,8 @@ from aiogram.utils.exceptions import BotBlocked
 async def search(msg: Message):
     await (respond := gather(search_db(msg.text.upper())))
     try:
-        await notify_kb(msg, respond.result()[0])
+        for i in range(0, len(respond.result()[0])):
+            await notify_kb(msg, respond.result()[0][i])
     except TypeError:
         await msg.answer('🙅‍♂️Nothing was found 😕')
 
@@ -21,8 +22,6 @@ async def error_1(msg: Message):
 
 
 async def notify(callback: CallbackQuery):
-    await callback.message.delete()
-    await callback.answer('🟢Message has sent!')
     notify_text = f"👋Hello!\n" \
                   f"❗YOUR CAR <b>PREVENTS</b> ANOTHER CAR\n" \
                   f"❕FROM LEAVING THE PARKING LOT\n" \
@@ -34,8 +33,12 @@ async def notify(callback: CallbackQuery):
         await bot.send_message(callback.data, notify_text,
                                parse_mode=ParseMode.HTML,
                                disable_web_page_preview=True)
+        await callback.answer('🟢We have notified them!', show_alert=True)
+
     except BotBlocked:
         await callback.message.answer("The owner of the car deleted/blocked the bot😐")
+    finally:
+        await callback.message.delete()
 
 
 def register_search(dp: Dispatcher):

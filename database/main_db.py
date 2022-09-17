@@ -63,4 +63,4 @@ async def search_db(car):
     WHERE number = '{car}' 
     OR extra = '{car}' 
     OR extra2 = '{car}' """)
-    return y[0] if (y := cursor.fetchall()) != list() else None
+    return y if (y := cursor.fetchall()) != list() else None
