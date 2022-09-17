@@ -18,3 +18,10 @@ contact.add(
     KeyboardButton('☎Send my number', request_contact=True),
     KeyboardButton('🙅‍♂️I prefer not to report it')
 )
+
+
+inline_delete_confirm = InlineKeyboardMarkup(row_width=1)
+inline_delete_confirm.add(
+    InlineKeyboardButton("🗑Yes, i want to clear my data", callback_data='delete_user'),
+    InlineKeyboardButton('🔙Back', callback_data='no_delete')
+)

@@ -1,3 +1,4 @@
+""" Everything related with registration process"""
 from aiogram.dispatcher import Dispatcher
 from aiogram.types import Message, ParseMode, CallbackQuery
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -22,13 +23,17 @@ async def extra_request(msg: Message):
 
 async def start_msg(msg: Message):
     await (answer := gather(check_user_db(msg.from_user.id)))
-    if answer is False:
+    if answer.result()[0] is False:
         hello_text = f"🇬🇧Hello <i>{msg.from_user.first_name}</i>!\n" \
                      f"This bot will help you to find owner of parked car🚘\n" \
                      f"<b>Let's register together!</b>"
         await msg.answer(hello_text, parse_mode=ParseMode.HTML, reply_markup=inline_go_kb)
     else:
         await msg.answer(f'Hi {msg.from_user.first_name}')
+
+
+async def register_again(msg: Message):
+    await msg.answer('🔄Alright, do you want to update your data?', reply_markup=inline_go_kb)
 
 
 async def register_start(callback: CallbackQuery):
@@ -55,18 +60,15 @@ async def write_data(msg: Message, state=FSMContext):
         except AttributeError:
             pass
         finally:
-            try:
-                await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
-                await msg.answer(f'🥳Your data were saved successfully\n'
-                                 f'🚙Your car number(s):\n'
-                                 f'<code>{data["main"]}</code>'
-                                 f'<code>{" " + x if (x := data["extra"]) is not None else ""}</code>'
-                                 f'<code>{" " + y if (y := data["extra2"]) is not None else ""}</code>\n'
-                                 f'Your contact: <i>{data["contact"]}</i>',
-                                 parse_mode=ParseMode.HTML,
-                                 reply_markup=ReplyKeyboardRemove())
-            except Exception:
-                await msg.answer('Something went wrong :/')
+            await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
+            await msg.answer(f'🥳Your data were saved successfully\n'
+                             f'🚙Your car number(s):\n'
+                             f'<code>{data["main"]}</code>'
+                             f'<code>{" " + x if (x := data["extra"]) is not None else ""}</code>'
+                             f'<code>{" " + y if (y := data["extra2"]) is not None else ""}</code>\n'
+                             f'📞Your contact: <i>{data["contact"]}</i>',
+                             parse_mode=ParseMode.HTML,
+                             reply_markup=ReplyKeyboardRemove())
     await state.finish()
 
 
@@ -105,7 +107,8 @@ async def extra_second(msg: Message, state=FSMContext):
 
 
 def register_user(dp: Dispatcher):
-    dp.register_message_handler(start_msg, commands='start')
+    dp.register_message_handler(start_msg, commands=['start', 'restart'])
+    dp.register_message_handler(register_again, commands='register')
     dp.register_callback_query_handler(register_start, text='start_register')
     # handle first number
     dp.register_message_handler(first_number,
