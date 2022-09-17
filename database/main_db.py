@@ -33,6 +33,13 @@ async def check_user_db(id_code):
     return False if cursor.fetchone() is None else True
 
 
+def de_check_user_db(id_code):
+    base = sql.connect('user_data.db')
+    cursor = base.cursor()
+    cursor.execute(f"""SELECT ROWID FROM cars WHERE id = {id_code}""")
+    return False if cursor.fetchone() is None else True
+
+
 async def delete_user_db(id_code):
     base = sql.connect('user_data.db')
     cursor = base.cursor()
@@ -46,3 +53,13 @@ async def user_info_db(id_code):
     cursor.execute(f"""SELECT * FROM cars WHERE id={id_code}""")
     x = cursor.fetchall()
     return x[0] if x != list() else None
+
+
+async def search_db(car):
+    base = sql.connect('user_data.db')
+    cursor = base.cursor()
+    cursor.execute(f"""SELECT id, contact FROM cars 
+    WHERE number = '{car}' 
+    OR extra = '{car}' 
+    OR extra2 = '{car}' """)
+    return y[0] if (y := cursor.fetchall()) != list() else None

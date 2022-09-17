@@ -93,14 +93,14 @@ async def extra_info(callback: CallbackQuery):
 
 async def extra_first(msg: Message, state=FSMContext):
     async with state.proxy() as data:
-        data['extra'] = msg.text
+        data['extra'] = msg.text.upper()
     await extra_request(msg)
 
 
 # extra 2
 async def extra_second(msg: Message, state=FSMContext):
     async with state.proxy() as data:
-        data['extra2'] = msg.text
+        data['extra2'] = msg.text.upper()
     await FsmRegister.phone.set()
     await msg.answer('📞Nice, I need your contact (Optional)',
                      reply_markup=contact)
