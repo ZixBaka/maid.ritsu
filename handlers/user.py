@@ -18,7 +18,7 @@ class FsmRegister(StatesGroup):
 
 
 async def extra_request(msg: Message):
-    await msg.answer('👍Awesome, do you want to add extra car?', reply_markup=inline_additional_confirm)
+    await msg.answer('👍Awesome, do you want to add an extra car?', reply_markup=inline_additional_confirm)
 
 
 async def start_msg(msg: Message, state=FSMContext):
