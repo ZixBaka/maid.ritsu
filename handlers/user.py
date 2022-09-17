@@ -107,7 +107,8 @@ async def extra_second(msg: Message, state=FSMContext):
 
 
 def register_user(dp: Dispatcher):
-    dp.register_message_handler(start_msg, commands=['start', 'restart'])
+    dp.register_message_handler(start_msg, commands=['start', 'restart'],
+                                state='*')
     dp.register_message_handler(register_again, commands='register')
     dp.register_callback_query_handler(register_start, text='start_register')
     # handle first number
