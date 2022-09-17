@@ -34,6 +34,6 @@ async def notify_kb(msg: Message, respond):
     )
     await msg.answer(f'🔎𝙍𝙚𝙨𝙪𝙡𝙩𝙨\n'
                      f'🚗𝐂𝐚𝐫: {msg.text.upper()}\n'
-                     f'📞𝐂𝐨𝐧𝐭𝐚𝐜𝐭: <code>{respond[1]}</code>\n',
+                     f'📞𝐂𝐨𝐧𝐭𝐚𝐜𝐭: <code>+{respond[1]}</code>\n',
                      reply_markup=inline_notify,
                      parse_mode=ParseMode.HTML)
