@@ -61,7 +61,8 @@ async def write_data(msg: Message, state=FSMContext):
         except AttributeError:
             pass
         finally:
-            await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'])
+            await insert_new_db(msg.chat.id, data['main'], data['extra'], data['extra2'], data['contact'],
+                                id_code=msg.from_user.id)
             await msg.answer(f'🥳Your data were saved successfully\n'
                              f'🚙Your car number(s):\n'
                              f'<code>{data["main"]}</code>'

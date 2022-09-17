@@ -14,14 +14,15 @@ async def db_start():
     )''')
 
 
-async def insert_new_db(*data):
+async def insert_new_db(*data, id_code="*"):
     base = sql.connect('user_data.db')
     cursor = base.cursor()
     try:
         cursor.execute(f"""INSERT INTO cars VALUES(?,?,?,?,?)""", data)
     except sql.IntegrityError:
         cursor.execute(f"""UPDATE cars 
-        SET number = ?, extra=?, extra2=?, contact=?""", data[1:])
+        SET number = ?, extra=?, extra2=?, contact=? 
+        WHERE id = {id_code}""", data[1:])
     finally:
         base.commit()
 
