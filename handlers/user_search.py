@@ -22,6 +22,7 @@ async def error_1(msg: Message):
 
 async def notify(callback: CallbackQuery):
     await callback.message.delete()
+    await callback.answer('🟢Message has sent!')
     notify_text = f"👋Hello!\n" \
                   f"❗YOUR CAR <b>PREVENTS</b> ANOTHER CAR\n" \
                   f"❕FROM LEAVING THE PARKING LOT\n" \
