@@ -6,7 +6,7 @@ After=network.target
 User=uwussimo
 Type=simple
 WorkingDirectory=/opt/ritsu
-ExecStart=/opt/ritsu/venv/bin/python bot.py
+ExecStart=/opt/ritsu/venv/bin/python main.py
 Restart=always
 
 [Install]
