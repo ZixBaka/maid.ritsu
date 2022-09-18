@@ -1,3 +1,4 @@
+import os
 import logging
 from helper import dp
 from aiogram import executor
@@ -19,5 +20,8 @@ register_search(dp)
 
 
 if __name__ == '__main__':
+    if not os.path.exists('data'):
+        os.mkdir('data')
+
     logging.basicConfig(level=logging.DEBUG)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
