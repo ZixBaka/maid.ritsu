@@ -1,1 +1,1 @@
-from bot.database import main_db
+from database import main_db
