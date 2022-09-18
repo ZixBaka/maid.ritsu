@@ -14,4 +14,4 @@ RUN pip install -r /app/requirements.txt
 COPY . .
 
 # Run the damn project
-CMD ["python", "maid_ritsu"]
+CMD ["python", "main.py"]
