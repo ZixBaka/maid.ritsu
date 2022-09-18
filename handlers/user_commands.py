@@ -60,7 +60,18 @@ async def help_info(msg: Message):
     await msg.answer(help_text, parse_mode=ParseMode.HTML)
 
 
+async def about(msg: Message):
+    about_text = f"𝐖𝐈𝐔𝐓 𝐏𝐚𝐫𝐤𝐢𝐧𝐠 𝐛𝐨𝐭\n" \
+                 f"\n🌐This bot is supported by the <a href='https://github.com/mad-maids'>" \
+                 f"Mad Maids</a> team founded" \
+                 f" by UwUssimo which focuses on improving open source in Uzbekistan!" \
+                 f"\n" \
+                 f"👨‍💻Coded by: @muminovbob"
+    await msg.answer(about_text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+
+
 def register_user_commands(dp: Dispatcher):
+    dp.register_message_handler(about, commands='about')
     dp.register_message_handler(confirm_delete, commands='delete')
     dp.register_message_handler(user_info, commands='me')
     dp.register_message_handler(help_info, commands='help')
