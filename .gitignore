@@ -2,3 +2,4 @@
 .vsode
 venv
 .env
+user_data.db
