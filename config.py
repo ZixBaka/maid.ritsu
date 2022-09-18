@@ -1,3 +1,3 @@
 import os
 
-TOKEN = os.environ.get('TOKEN')
+TOKEN = os.environ.get('PARKING_TOKEN')
