@@ -64,8 +64,9 @@ async def about(msg: Message):
     about_text = f"𝐖𝐈𝐔𝐓 𝐏𝐚𝐫𝐤𝐢𝐧𝐠 𝐛𝐨𝐭\n" \
                  f"<i>This bot exists thankfully for those who contributed\n" \
                  f"this project, and they are:</i>\n" \
-                 f"👨‍💻<a href='https://t.me/muminovbob'>Bobomurod</a>(Creator, Maintainer)\n" \
-                 f"👩‍🚀<a href='https://github.com/uwussimo'>UwUssimo</a>(Core Contributor)\n" \
+                 f"\n" \
+                 f"👨‍💻<a href='https://t.me/muminovbob'>Bobomurod</a> (Creator, Maintainer)\n" \
+                 f"👩‍🚀<a href='https://github.com/uwussimo'>UwUssimo</a> (Core Contributor)\n" \
                  f"\n" \
                  f"Copyright © 2022 <a href='https://github.com/mad-maids'>Mad Maids</a>"
     await msg.answer(about_text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
