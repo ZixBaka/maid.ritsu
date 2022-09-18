@@ -1,10 +1,10 @@
 from aiogram.types import Message, CallbackQuery, ParseMode
 from aiogram.dispatcher import Dispatcher
-from bot.filters.valid_number import is_valid
+from filters.valid_number import is_valid
 from asyncio import gather
-from bot.database.main_db import search_db, de_check_user_db
-from bot.keyboards.user_register_inline import notify_kb
-from bot.helper import bot
+from database.main_db import search_db, de_check_user_db
+from keyboards.user_register_inline import notify_kb
+from helper import bot
 from aiogram.utils.exceptions import BotBlocked
 
 

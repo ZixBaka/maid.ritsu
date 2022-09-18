@@ -1,8 +1,8 @@
 from aiogram.types import Message, ParseMode, CallbackQuery
 from aiogram.dispatcher import Dispatcher
-from bot.keyboards.user_register_inline import inline_delete_confirm
-from bot.database.main_db import delete_user_db, user_info_db
-from bot.helper import bot
+from keyboards.user_register_inline import inline_delete_confirm
+from database.main_db import delete_user_db, user_info_db
+from helper import bot
 from asyncio import gather
 
 

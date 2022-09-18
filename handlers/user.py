@@ -3,9 +3,9 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.types import Message, ParseMode, CallbackQuery
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from bot.keyboards.user_register_inline import inline_go_kb, inline_additional_confirm, contact
-from bot.filters.valid_number import is_valid
-from bot.database.main_db import insert_new_db, check_user_db
+from keyboards.user_register_inline import inline_go_kb, inline_additional_confirm, contact
+from filters.valid_number import is_valid
+from database.main_db import insert_new_db, check_user_db
 from aiogram.types import ReplyKeyboardRemove
 from asyncio import gather
 

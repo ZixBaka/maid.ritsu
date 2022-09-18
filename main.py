@@ -1,10 +1,10 @@
-from bot.helper import dp
+from helper import dp
 from aiogram import executor
-from bot.handlers.user import register_user
+from handlers.user import register_user
 from database.main_db import db_start
-from bot.handlers.user_commands import register_user_commands
-from bot.handlers.user_search import register_search
-from bot.handlers.admin import register_admin
+from handlers.user_commands import register_user_commands
+from handlers.user_search import register_search
+from handlers.admin import register_admin
 
 
 async def on_startup(_):
