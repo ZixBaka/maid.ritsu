@@ -3,7 +3,7 @@ from aiogram.dispatcher import Dispatcher
 
 
 async def backup(msg: Message):
-    await msg.answer_document(open('user_data.db', 'br'),
+    await msg.answer_document(open('data/user_data.db', 'br'),
                               caption=f"This is your backup for {msg.date.date()}")
 
 
