@@ -1,8 +1,11 @@
 FROM python:3.9-buster
-ENV BOT_NAME=$BOT_NAME
 
-WORKDIR /usr/src/app/"${BOT_NAME:-maid-ritsu}"
+WORKDIR /app
 
-COPY requirements.txt /usr/src/app/"${BOT_NAME:-maid-ritsu}"
-RUN pip install -r /usr/src/app/"${BOT_NAME:-maid-ritsu}"/requirements.txt
-COPY . /usr/src/app/"${BOT_NAME:-maid-ritsu}"
+USER maid
+
+COPY requirements.txt .
+RUN pip install -r /app/requirements.txt
+
+COPY . .
+CMD ["python", "maid_ritsu"]
