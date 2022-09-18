@@ -1,3 +1,4 @@
+import logging
 from helper import dp
 from aiogram import executor
 from handlers.user import register_user
@@ -18,4 +19,5 @@ register_search(dp)
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
