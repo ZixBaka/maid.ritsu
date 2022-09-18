@@ -62,11 +62,12 @@ async def help_info(msg: Message):
 
 async def about(msg: Message):
     about_text = f"𝐖𝐈𝐔𝐓 𝐏𝐚𝐫𝐤𝐢𝐧𝐠 𝐛𝐨𝐭\n" \
-                 f"\n🌐This bot is supported by the <a href='https://github.com/mad-maids'>" \
-                 f"Mad Maids</a> team founded" \
-                 f" by UwUssimo which focuses on improving open source in Uzbekistan!" \
+                 f"<i>This bot exists thankfully for those who contributed\n" \
+                 f"this project, and they are:</i>\n" \
+                 f"👨‍💻<a href='https://t.me/muminovbob'>Bobomurod</a>(Creator, Maintainer)\n" \
+                 f"👩‍🚀<a href='https://github.com/uwussimo'>UwUssimo</a>(Core Contributor)\n" \
                  f"\n" \
-                 f"👨‍💻Coded by: @muminovbob"
+                 f"Copyright © 2022 <a href='https://github.com/mad-maids'>Mad Maids</a>"
     await msg.answer(about_text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
 
 
