@@ -1,8 +1,10 @@
 import sqlite3 as sql
 
+DATABASE_LOCATION = "data/user_data.db"
+
 
 async def db_start():
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     if base:
         print('Data base activated')
     base.execute('''CREATE TABLE IF NOT EXISTS cars(
@@ -15,7 +17,7 @@ async def db_start():
 
 
 async def insert_new_db(*data, id_code="*"):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     try:
         cursor.execute(f"""INSERT INTO cars VALUES(?,?,?,?,?)""", data)
@@ -28,28 +30,28 @@ async def insert_new_db(*data, id_code="*"):
 
 
 async def check_user_db(id_code):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     cursor.execute(f"""SELECT ROWID FROM cars WHERE id = {id_code}""")
     return False if cursor.fetchone() is None else True
 
 
 def de_check_user_db(id_code):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     cursor.execute(f"""SELECT ROWID FROM cars WHERE id = {id_code}""")
     return False if cursor.fetchone() is None else True
 
 
 async def delete_user_db(id_code):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     cursor.execute(f"""DELETE FROM cars WHERE id = {id_code}""")
     base.commit()
 
 
 async def user_info_db(id_code):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     cursor.execute(f"""SELECT * FROM cars WHERE id={id_code}""")
     x = cursor.fetchall()
@@ -57,7 +59,7 @@ async def user_info_db(id_code):
 
 
 async def search_db(car):
-    base = sql.connect('user_data.db')
+    base = sql.connect(DATABASE_LOCATION)
     cursor = base.cursor()
     cursor.execute(f"""SELECT id, contact FROM cars 
     WHERE number = '{car}' 
