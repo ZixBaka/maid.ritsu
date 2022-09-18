@@ -15,6 +15,18 @@ are:
 - [Bobomurod](https://github.com/muminovbob)
 - [UwUssimo](https://github.com/uwussimo)
 
+## Hosting
+
+It's highly recommended to run the bot using Docker. Use the following command to
+launch your own instance: 
+
+````shell
+docker run -d -t -i \
+  -e PARKING_TOKEN='<TOKEN>' \
+  --volume /opt/ritsu/data:/app/data \
+  --name ritsu ghcr.io/mad-maids/maid-ritsu:master
+````
+
 ---
 
 > The bot is still in beta phase so feel free to
