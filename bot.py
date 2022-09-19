@@ -7,10 +7,19 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
+from tgbot.filters.car_in_db import CarInDB
+from tgbot.filters.is_private import IsPrivate
+from tgbot.filters.search_car import SearchCar
+from tgbot.filters.user_in_db import UserInDB
+from tgbot.handlers import user_menu
 from tgbot.handlers.admin import register_admin
+from tgbot.handlers.discussion_room import discussion_handlers
 from tgbot.handlers.echo import register_echo
-from tgbot.handlers.user import register_user
+from tgbot.handlers.user_menu import user_menu_handlers
+from tgbot.handlers.user_registration import user_registration_handlers
+from tgbot.handlers.user_settings import user_settings_handlers
 from tgbot.middlewares.environment import EnvironmentMiddleware
+from tgbot.services.database import create_db_session
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +29,20 @@ def register_all_middlewares(dp, config):
 
 
 def register_all_filters(dp):
-    dp.filters_factory.bind(AdminFilter)
+    # dp.filters_factory.bind(AdminFilter)
+    dp.filters_factory.bind(IsPrivate)
+    dp.filters_factory.bind(UserInDB)
+    dp.filters_factory.bind(CarInDB)
+    dp.filters_factory.bind(SearchCar)
 
 
 def register_all_handlers(dp):
-    register_admin(dp)
-    register_user(dp)
-
-    register_echo(dp)
+    # register_admin(dp)
+    user_registration_handlers(dp)
+    user_menu_handlers(dp)
+    user_settings_handlers(dp)
+    discussion_handlers(dp)
+    # register_echo(dp)
 
 
 async def main():
@@ -43,6 +58,7 @@ async def main():
     dp = Dispatcher(bot, storage=storage)
 
     bot['config'] = config
+    bot['db'] = await create_db_session(config)
 
     register_all_middlewares(dp, config)
     register_all_filters(dp)
