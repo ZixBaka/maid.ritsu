@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, InlineQueryResultArticle, InlineQuery, InputTextMessageContent, CallbackQuery
 
 from tgbot.config import Config
-from tgbot.keyboards.inline import found_driver_keyboard
+from tgbot.keyboards.inline import found_driver_keyboard, car_callback, main_menu_keyboard
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
@@ -20,7 +20,7 @@ async def feedback_discussion(msg: Message):
 
 async def search_owner(query: InlineQuery, cars: [Car]):
     car_numbers = []
-    print(cars)
+
     for car in cars:
         car_numbers.append(InlineQueryResultArticle(
             id=f"{car.car_number}",
@@ -29,18 +29,17 @@ async def search_owner(query: InlineQuery, cars: [Car]):
             input_message_content=InputTextMessageContent(
                 message_text=f"<b>{car.car_number}</b>",
             )))
+
     await query.answer(
         results=car_numbers,
         cache_time=2)
 
 
-async def cancel_searching(call: CallbackQuery):
-    await call.message.delete()
-    await Menu.in_main_menu.set()
 
 
 async def cancel_chatting(call: CallbackQuery):
     await call.answer()
+    await call.message.answer("main menu", reply_markup=main_menu_keyboard)
     await Menu.in_main_menu.set()
 
 
@@ -51,19 +50,23 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
                                 )
     car_owner = await Car.get_car(call.bot.get("db"), car_number)
 
+    await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.start_chat.state)
+    await state.storage.set_data(chat=car_owner.owner, user=car_owner.owner, data=dict(partner=call.from_user.id))
+
+    await Menu.start_chat.set()
+
     await state.update_data(dict(partner=car_owner.owner))
 
 
-# async def enter_discussion(call: CallbackQuery, callback_data: dict):
-#     car_number =
-#
-# async def send_message(msg: Message, state: ):
+async def send_message(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    await msg.bot.send_message(data.get("partner"), msg.text + "\n send /finish to end dialog")
 
 
 def discussion_handlers(dp: Dispatcher):
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
-    dp.register_inline_handler(search_owner, search_car=True, state=Menu.search_student)
-    dp.register_callback_query_handler(cancel_searching, text="cancel_searching", state=Menu.search_student)
-    dp.register_callback_query_handler(cancel_chatting, text="cancel_chatting", state=Menu.search_student)
-
-
+    dp.register_inline_handler(search_owner, search_car=True, state=Menu.in_main_menu)
+    dp.register_callback_query_handler(cancel_chatting, text="cancel_chatting", state=Menu.start_chat)
+    dp.register_callback_query_handler(start_chatting, car_callback.filter(method="enter_room"),
+                                       state=Menu.in_main_menu)
+    dp.register_message_handler(send_message, state=Menu.start_chat)

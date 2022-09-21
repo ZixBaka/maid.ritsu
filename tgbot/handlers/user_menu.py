@@ -14,7 +14,6 @@ async def settings(call: CallbackQuery):
 
     await Menu.settings.set()
 
-
 async def feedback(call: CallbackQuery):
     await call.message.delete()
 
@@ -55,8 +54,8 @@ async def finish(msg: Message):
 def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(settings, text="settings", state=Menu.in_main_menu, in_db=True)
     dp.register_callback_query_handler(about_us, text="about", state=Menu.in_main_menu, in_db=True)
-    dp.register_message_handler(finish, commands="finish", state=Menu.feedback)
 
+    dp.register_message_handler(finish, commands="finish", state=Menu.feedback)
     dp.register_callback_query_handler(feedback, text="feedback", state=Menu.in_main_menu, in_db=True)
 
     dp.register_callback_query_handler(exit_to_menu, text="back_to_menu", state="*")

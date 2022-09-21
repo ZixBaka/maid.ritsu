@@ -19,6 +19,7 @@ from tgbot.handlers.user_menu import user_menu_handlers
 from tgbot.handlers.user_registration import user_registration_handlers
 from tgbot.handlers.user_settings import user_settings_handlers
 from tgbot.middlewares.environment import EnvironmentMiddleware
+from tgbot.middlewares.throttling import ThrottlingMiddleware
 from tgbot.services.database import create_db_session
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 def register_all_middlewares(dp, config):
     dp.setup_middleware(EnvironmentMiddleware(config=config))
+    dp.setup_middleware(ThrottlingMiddleware())
 
 
 def register_all_filters(dp):

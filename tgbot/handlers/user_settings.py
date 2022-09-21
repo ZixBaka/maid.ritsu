@@ -25,9 +25,9 @@ async def check_cars(query: InlineQuery):
         cache_time=2)
 
 
-async def cars_settings(msg: Message):
-    await msg.answer("<b>Okay, what do you want to do with your cars?!</b>",
-                     reply_markup=main_car_inline_keyboard)
+async def cars_settings(call: CallbackQuery):
+    await call.message.answer("<b>Okay, what do you want to do with your cars?!</b>",
+                              reply_markup=main_car_inline_keyboard)
     await Menu.car_settings.set()
 
 
@@ -101,7 +101,7 @@ async def update_card_number(msg: Message):
 
 def user_settings_handlers(dp: Dispatcher):
     dp.register_inline_handler(check_cars, state=Menu.car_settings)
-    dp.register_callback_query_handler(cars_settings, text="Cars", state=Menu.settings, in_db=True)
+    dp.register_callback_query_handler(cars_settings, text="my_cars", state=Menu.settings, in_db=True)
     dp.register_callback_query_handler(close_car_msg, state=Menu.car_settings, text="close_car")
     dp.register_callback_query_handler(add_car,  text="add_car", state=Menu.car_settings)
     dp.register_message_handler(insert_card_number,  content_types=types.ContentType.TEXT, state=Menu.add_car,
