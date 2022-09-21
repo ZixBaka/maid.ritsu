@@ -2,9 +2,8 @@ from aiogram import Dispatcher, types
 from aiogram.types import Message, InlineQuery, InlineQueryResultArticle, InputTextMessageContent, CallbackQuery
 from sqlalchemy.orm import sessionmaker
 
-from tgbot.filters.car_in_db import CarInDB
-from tgbot.keyboards.inline import main_car_inline_keyboard, separate_car_inline_keyboard, car_callback
-from tgbot.keyboards.reply import settings_keyboard, main_menu_keyboard
+from tgbot.keyboards.inline import main_car_inline_keyboard, separate_car_inline_keyboard, car_callback, \
+    main_menu_keyboard, settings_keyboard
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
@@ -49,7 +48,7 @@ async def insert_card_number(msg: Message):
     await Menu.settings.set()
 
 
-async def car_number_exist(msg: Message):
+async def car_number_exist(msg: Message, ):
     await msg.answer(
         "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>",
         reply_markup=main_menu_keyboard)
@@ -68,7 +67,7 @@ async def delete_the_car(call: CallbackQuery, callback_data: dict):
 
     if await Car.get_car(call.bot.get("db"), car_number) is None:
         await call.bot.send_message(call.from_user.id, "<b>You don't own this car 0_o</b>",
-                                reply_markup=main_menu_keyboard)
+                                    reply_markup=main_menu_keyboard)
     else:
         await call.bot.send_message(call.from_user.id, "<b>I successfully deleted the car ^^</b>",
                                     reply_markup=main_menu_keyboard)
@@ -102,7 +101,7 @@ async def update_card_number(msg: Message):
 
 def user_settings_handlers(dp: Dispatcher):
     dp.register_inline_handler(check_cars, state=Menu.car_settings)
-    dp.register_message_handler(cars_settings, text="Cars", state=Menu.settings, in_db=True)
+    dp.register_callback_query_handler(cars_settings, text="Cars", state=Menu.settings, in_db=True)
     dp.register_callback_query_handler(close_car_msg, state=Menu.car_settings, text="close_car")
     dp.register_callback_query_handler(add_car,  text="add_car", state=Menu.car_settings)
     dp.register_message_handler(insert_card_number,  content_types=types.ContentType.TEXT, state=Menu.add_car,

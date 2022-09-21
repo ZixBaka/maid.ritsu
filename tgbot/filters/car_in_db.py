@@ -16,21 +16,18 @@ class CarInDB(BoundFilter):
     async def check(self, obj, *args):
         if self.car_in_db is None:
             return True
-        print(self.car_in_db)
         session_maker = obj.bot.get('db')
 
         car_number: types.Message.text = obj.text
 
+        print(car_number)
         car = await Car.get_car(session_maker, car_number)
 
         data = dict(car=car)
-        print(car)
         if car is None:
             if self.car_in_db is True:
-                print(".")
                 return False
             else:
-                print("..")
                 return True
 
         if car is not None:

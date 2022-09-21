@@ -7,10 +7,6 @@ main_car_inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Close", callback_data="close_car")]
 ])
 
-search_driver_keyboard = InlineKeyboardMarkup(inline_keyboard=([
-    [InlineKeyboardButton("Search🔎", switch_inline_query_current_chat="")],
-    [InlineKeyboardButton(text="Cancel", callback_data="cancel_searching")]]))
-
 car_callback = CallbackData("car", "method", "number")
 
 
@@ -31,4 +27,26 @@ def separate_car_inline_keyboard(car_number: str):
     ]])
 
 
+main_menu_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[[InlineKeyboardButton(text="Find a car owner🔎", switch_inline_query_current_chat="")],
+                     [InlineKeyboardButton(text="Settings⚙️", callback_data="settings")],
+                     [InlineKeyboardButton(text="About us™️", callback_data="about"),
+                      InlineKeyboardButton(text="Feedback🛎", callback_data="feedback")]],
+    resize_keyboard=True)
 
+
+settings_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Cars", callback_data="my_cars"),
+     InlineKeyboardButton(text="Phone", callback_data="my_phone")],
+    [InlineKeyboardButton(text="Back", callback_data="back_to_menu")]],
+    resize_keyboard=True)
+
+about_us_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Exit", callback_data="back_to_menu")]],
+    resize_keyboard=True
+ )
+
+feedback_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Finish", callback_data="back_to_menu")]],
+    resize_keyboard=True
+)

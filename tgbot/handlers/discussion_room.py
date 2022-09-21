@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, InlineQueryResultArticle, InlineQuery, InputTextMessageContent, CallbackQuery
 
 from tgbot.config import Config
-from tgbot.keyboards.inline import separate_car_inline_keyboard, found_driver_keyboard
+from tgbot.keyboards.inline import found_driver_keyboard
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 

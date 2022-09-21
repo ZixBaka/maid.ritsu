@@ -64,7 +64,7 @@ class Car(Base):
 
     @classmethod
     async def get_all_by_number_like(cls, session_maker: sessionmaker,
-                                     car_number: int, status: int = 1):
+                                     car_number: str, status: int = 1):
         async with session_maker() as db_session:
             sql = select(cls).where(cls.status == status).filter(cls.car_number.like(car_number))
             request = await db_session.execute(sql)

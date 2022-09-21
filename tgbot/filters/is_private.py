@@ -6,10 +6,10 @@ from aiogram.dispatcher.filters import BoundFilter
 
 class IsPrivate(BoundFilter):
 
-    key="is_private"
+    key = "is_private"
 
     def __init__(self, is_private=typing.Optional[bool]):
-        self.is_private =is_private
+        self.is_private = is_private
 
     async def check(self, obj, *args):
         chat: types.ChatType = obj.chat

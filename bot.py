@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
@@ -14,7 +14,7 @@ from tgbot.filters.user_in_db import UserInDB
 from tgbot.handlers import user_menu
 from tgbot.handlers.admin import register_admin
 from tgbot.handlers.discussion_room import discussion_handlers
-from tgbot.handlers.echo import register_echo
+from tgbot.handlers.error import error_handler
 from tgbot.handlers.user_menu import user_menu_handlers
 from tgbot.handlers.user_registration import user_registration_handlers
 from tgbot.handlers.user_settings import user_settings_handlers
@@ -37,12 +37,20 @@ def register_all_filters(dp):
 
 
 def register_all_handlers(dp):
+    error_handler(dp)
     # register_admin(dp)
     user_registration_handlers(dp)
     user_menu_handlers(dp)
     user_settings_handlers(dp)
     discussion_handlers(dp)
-    # register_echo(dp)
+
+
+async def set_default_commands(dp):
+    await dp.bot.set_my_commands([
+        types.BotCommand("restart", "- Restart the bot"),
+        types.BotCommand("help", "- Instructions"),
+        types.BotCommand("finish", "- Finish the discussion")
+    ])
 
 
 async def main():
@@ -63,7 +71,7 @@ async def main():
     register_all_middlewares(dp, config)
     register_all_filters(dp)
     register_all_handlers(dp)
-
+    await set_default_commands(dp)
     # start
     try:
         await dp.start_polling()
