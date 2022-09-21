@@ -11,4 +11,4 @@ RUN pip install -r /app/requirements.txt
 COPY . .
 
 # Run the damn project
-CMD ["python", "main.py"]
+CMD ["python", "bot.py"]
