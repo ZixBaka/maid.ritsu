@@ -60,7 +60,21 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
 
 async def send_message(msg: Message, state: FSMContext):
     data = await state.get_data()
-    await msg.bot.send_message(data.get("partner"), msg.text + "\n send /finish to end dialog")
+    partner = data.get("partner")
+    partner_state = await state.storage.get_state(chat=partner, user=partner)
+    partner_data = await state.storage.get_data(chat=partner, user=partner)
+    if partner_state == Menu.start_chat.state:
+        if partner_data.get("partner") == msg.from_user.id:
+            await msg.bot.send_message(data.get("partner"), msg.text + "\n send /finish to end dialog")
+        else:
+            await msg.answer("This driver is chatting with another car driver, please try later",
+                             reply_markup=main_menu_keyboard)
+            # TODO: add extra inline keyboards, with hold and return to menu buttons, if partner is busy
+            await Menu.in_main_menu.set()
+
+    else:
+        await msg.answer("<b>Your Partner decided to end conversation</b>", reply_markup=main_menu_keyboard)
+        await Menu.in_main_menu.set()
 
 
 def discussion_handlers(dp: Dispatcher):
