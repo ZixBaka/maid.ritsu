@@ -10,9 +10,16 @@ from tgbot.models.cars import Car
 
 async def feedback_discussion(msg: Message):
     config: Config = msg.bot.get("config")
+<<<<<<< HEAD
     await msg.bot.send_message(
         config.tg_bot.admins_group[0],
         "".join([f"<b>From user: <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
+=======
+
+    await msg.bot.send_message(
+        config.tg_bot.admins_group[0],
+        "".join([f"<b>From user:\n <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
+>>>>>>> 4dff5f5 (Initial commit)
                  f"<i>{msg.text}</i>"],
                 ))
 
@@ -34,8 +41,11 @@ async def search_owner(query: InlineQuery, cars: [Car]):
         cache_time=2)
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 4dff5f5 (Initial commit)
 async def cancel_chatting(call: CallbackQuery):
     await call.answer()
     await call.message.answer("main menu", reply_markup=main_menu_keyboard)
@@ -45,7 +55,8 @@ async def cancel_chatting(call: CallbackQuery):
 async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMContext):
     car_number = callback_data.get("number")
     await call.bot.send_message(call.from_user.id,
-                                "<b>You can write now, all messages will be delivered to the car owner.</b>\n write /finish to end a chat",
+                                "<b>You can write now, all messages will be delivered to the car owner.</b>\n write "
+                                "/finish to end a chat",
                                 )
     car_owner = await Car.get_car(call.bot.get("db"), car_number)
 

@@ -5,6 +5,10 @@ from tgbot.services.db_base import Base
 
 
 class Student(Base):
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4dff5f5 (Initial commit)
     __tablename__ = "student"
 
     tg_id = Column(BigInteger, primary_key=True)

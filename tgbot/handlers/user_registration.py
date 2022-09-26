@@ -35,11 +35,7 @@ async def register_car_number(msg: Message):
     # TODO: answer text
     session_maker: sessionmaker = msg.bot.get("db")
     car_num = msg.text.upper().replace(" ", "")
-    await msg.reply(" ".join([
-        "<b> Cool! Now, you can share our contact</b> \n\n\n\n",
-        "<i> But you must remember that Mad Maids is an organization made up of enthusiasts who respect privacy..</i>",
-        "<i>Sharing your contact is</i> <b>optional</b><i> skip this step by sending /cancel</i>."
-    ]))
+    await msg.reply('..fill this')
     await Student.create_student(session_maker, tg_id=msg.from_user.id)
     await Car.add_car(session_maker, car_number=car_num, owner=msg.from_user.id)
     await RegisterUser.insert_phone_number.set()
@@ -76,25 +72,28 @@ async def register_phone_number_forwarded(msg: Message):
 
 
 async def cancel_phone_registration(msg: Message, state: FSMContext):
-    # TODO: answer text
     await msg.answer(" ".join(["<b> Good, there is no need for me to know your phone number </b>",
-                               "<b>to provide core functionality.</b>\n\n\n",
+                               "<b>to provide core functionality.</b>",
                                "<i>Hint: in settings, you are able to manage your data.</i>"]),
                      reply_markup=main_menu_keyboard)
     await state.finish()
     await Menu.in_main_menu.set()
 
 
-async def user_restart(msg: Message):
-    # TODO: answer text
-    await msg.answer("<b>I am restarted!</b>", reply_markup=main_menu_keyboard)
+async def tools(msg: Message):
+    await msg.answer("🛠<b>  TOOLS  </b>", reply_markup=main_menu_keyboard)
     await Menu.in_main_menu.set()
+
+
+async def user_restart(msg: Message, state=FSMContext):
+    await state.finish()
+    await msg.answer('🟢Everything was restarted🔄')
 
 
 def user_registration_handlers(dp: Dispatcher):
     dp.register_message_handler(user_start, commands=["start"], in_db=False)
-
     dp.register_message_handler(user_restart, commands=["start", "restart"], state="*")
+    dp.register_message_handler(tools, commands='tools')
 
     dp.register_message_handler(register_car_number, IsValidCar(True), state=RegisterUser.insert_car_number,
                                 car_in_db=False)
