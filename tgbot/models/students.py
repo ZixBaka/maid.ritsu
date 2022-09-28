@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, insert, select, update, SmallInteger, and_, delete
+from sqlalchemy import Column, BigInteger, String, insert, select, update, SmallInteger, and_
 from sqlalchemy.orm import sessionmaker
 
 from tgbot.services.db_base import Base
