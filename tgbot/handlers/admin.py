@@ -16,6 +16,18 @@ async def admin_start(message: Message):
     await AdminStates.in_admin_panel.set()
 
 
+async def send_chat(call: CallbackQuery, state: FSMContext):
+    await call.message.answer("telegram id is needed")
+    await AdminStates.selecting_partner_for_chatting.set()
+
+
+async def select_chat_partner(msg: Message):
+
+    partner = Student.get_student(msg.bot.get("db"), tg_id=int(msg.text))
+    if partner is None:
+        await msg.answer("This user has ")
+
+
 async def admin_cars(call: CallbackQuery):
     await call.message.delete()
     await call.message.answer("Send me a number")
@@ -116,6 +128,8 @@ async def hide(call: CallbackQuery, state: FSMContext):
 
 def register_admin(dp: Dispatcher):
     dp.register_message_handler(admin_start, state=["*", ""], commands=["admin"], is_admin=True)
+    # =======Chat======
+
 
     # =======Cars======
     dp.register_callback_query_handler(admin_cars, admin_menu_call_data.filter(action="find_car"),

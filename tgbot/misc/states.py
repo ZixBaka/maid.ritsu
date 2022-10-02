@@ -2,6 +2,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
 class AdminStates(StatesGroup):
+    selecting_partner_for_chatting = State()
     in_admin_panel = State()
     search_car = State()
     search_driver = State()
