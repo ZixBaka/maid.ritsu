@@ -5,9 +5,11 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.config import Config
 from tgbot.keyboards.inline import found_driver_keyboard, car_callback, back_inline_car, feedback_keyboard, \
     found_driver_keyboard_extra, on_my_way, on_my_way_extra, notify_callback, ignore_callback
+from tgbot.keyboards.admin_kb import admin_feedback_keyboard
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
+from aiogram.utils.exceptions import BotBlocked
 
 
 # ============= FEEDBACK =====================
@@ -16,10 +18,11 @@ async def feedback_discussion(msg: Message):
 
     await msg.reply('Your message has been sent👍')
     await msg.bot.send_message(
-        config.tg_bot.admins_group[0],
-        "".join([f"<b>From user:\n <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
-                 f"<i>{msg.text}</i>"],
-                ))
+        config.tg_bot.admins_group,
+        "".join([f"<b>From user:\n <code>{msg.from_user.id}</code>"
+                 f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
+                 f"<i>{msg.text}</i>"]
+                ), reply_markup=admin_feedback_keyboard(msg.from_user.id))
 
 
 # ============= SEARCH =====================
@@ -128,21 +131,24 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
 
     start_text_r = f"🟢<b>Someone (<code>{requester.car_number}</code>) started dialogue with you</b>💬\n" \
                    f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
-    # who called
-    await call.message.edit_text(start_text)
-    await call.message.edit_reply_markup(feedback_keyboard)
+    try:
+        await call.message.edit_text(start_text)
+        await call.message.edit_reply_markup(feedback_keyboard)
 
-    # owner
-    car_owner = await Car.get_car(session_maker, car_number)
+        # owner
+        car_owner = await Car.get_car(session_maker, car_number)
 
-    await call.message.bot.send_message(car_owner.owner, start_text_r, reply_markup=feedback_keyboard)
+        await call.message.bot.send_message(car_owner.owner, start_text_r, reply_markup=feedback_keyboard)
 
-    await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.start_chat.state)
-    await state.storage.set_data(chat=car_owner.owner, user=car_owner.owner, data=dict(partner=call.from_user.id))
+        await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.start_chat.state)
+        await state.storage.set_data(chat=car_owner.owner, user=car_owner.owner, data=dict(partner=call.from_user.id))
 
-    await Menu.start_chat.set()
+        await Menu.start_chat.set()
 
-    await state.update_data(dict(partner=car_owner.owner))
+        await state.update_data(dict(partner=car_owner.owner))
+    except BotBlocked:
+        await call.message.answer('Partner blocked this bot')
+        await state.finish()
 
 
 async def send_message(msg: Message, state: FSMContext):
@@ -189,13 +195,6 @@ def discussion_handlers(dp: Dispatcher):
     # ========= FEEDBACK ==========
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
 
-    # ========= SEARCH ==========
-    dp.register_message_handler(start_search, commands='search', is_user_valid=True)
-
-    dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
-    dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
-    dp.register_message_handler(finish, commands="finish", state=Menu.start_chat)
-
     # ========= Notify ==========
     dp.register_callback_query_handler(notify_user, car_callback.filter(method="notify"), state=Menu.search_number)
     dp.register_callback_query_handler(on_my_way_respond, notify_callback.filter(method='on_my_way'),
@@ -204,6 +203,7 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(ignore_request, ignore_callback.filter(method='ignore'),
                                        state=Menu.search_number)
     # ========= CHAT ==========
+    dp.register_message_handler(finish, commands="finish", state=Menu.start_chat)
     dp.register_callback_query_handler(cancel_chatting, text="back_to_menu",
                                        state=Menu.start_chat)
     dp.register_callback_query_handler(cancel_searching, text="cancel_chatting",
@@ -216,3 +216,11 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(error_late_start, car_callback.filter(method="enter_room"),
                                        state=Menu.start_chat)
     dp.register_callback_query_handler(error_late_finish, text="back_to_menu")
+
+    # ========= SEARCH ==========
+    # TODO: connect is_private to search as you fix it
+    dp.register_message_handler(start_search, commands='search', is_user_valid=True,
+                                state="*")
+    dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
+    dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
+

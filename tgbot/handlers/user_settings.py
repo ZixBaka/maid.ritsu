@@ -43,7 +43,6 @@ async def insert_car_number(msg: Message):
     await msg.reply("\n".join([
         "<b>🟢Nice! Your new number was recorded!</b>"
     ]), reply_markup=main_car_inline_keyboard)
-    # TODO: handle cars with status 0
     await Car.add_car(session_maker, car_number=car_num, owner=msg.from_user.id)
     await Menu.car_settings.set()
 

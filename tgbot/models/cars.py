@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import Column, String, insert, select, delete, SmallInteger, ForeignKey, and_, BigInteger, update
 from sqlalchemy.orm import sessionmaker
 
@@ -24,6 +22,16 @@ class Car(Base):
             result = await db_session.execute(sql)
             await db_session.commit()
             return result
+
+    @classmethod
+    async def get_car(cls, session_maker: sessionmaker,
+                      car_number: str, status: int = 1) -> 'Car':
+        async with session_maker() as db_session:
+            sql = select(cls).where(cls.car_number == car_number, cls.status == status)
+            request = await db_session.execute(sql)
+            car: cls = request.scalar()
+            await db_session.commit()
+            return car
 
     @classmethod
     async def get_cars(cls, session_maker: sessionmaker,
@@ -74,7 +82,6 @@ class Car(Base):
             cars: cls = request.scalars()
             await db_session.commit()
             return cars
-
 
     @classmethod
     async def get_all_by_number(cls, session_maker: sessionmaker,
@@ -131,4 +138,3 @@ class Car(Base):
             request = await db_session.execute(sql)
             await db_session.commit()
             return request
-

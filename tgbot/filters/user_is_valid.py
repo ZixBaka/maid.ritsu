@@ -16,7 +16,9 @@ class IsValidUser(BoundFilter):
         session_maker = obj.bot.get('db')
         telegram_user: types.User = obj.from_user
         status = await Student.get_user_status(session_maker, telegram_user.id)
+        if status is None:
+            return True
         if self.is_user_valid is True:
             return True if status == 1 else False
         else:
-            return True
+            return False

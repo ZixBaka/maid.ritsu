@@ -1,14 +1,11 @@
-from sqlalchemy import Column, BigInteger, String, insert, select, update, SmallInteger, and_
+from sqlalchemy import Column, BigInteger, String, insert, select, update,\
+    SmallInteger, and_, delete
 from sqlalchemy.orm import sessionmaker
 
 from tgbot.services.db_base import Base
 
 
 class Student(Base):
-<<<<<<< HEAD
-=======
-
->>>>>>> 4dff5f5 (Initial commit)
     __tablename__ = "student"
 
     tg_id = Column(BigInteger, primary_key=True)
@@ -27,10 +24,9 @@ class Student(Base):
             return result
 
     @classmethod
-    async def get_student(cls, session_maker: sessionmaker,
-                          tg_id: int, status: int = 1) -> 'Student':
+    async def get_student(cls, session_maker: sessionmaker, tg_id: int) -> 'Student':
         async with session_maker() as db_session:
-            sql = select(cls).where(and_(cls.tg_id == tg_id, cls.status == status))
+            sql = select(cls).where(cls.tg_id == tg_id)
             request = await db_session.execute(sql)
             student: cls = request.scalar()
             await db_session.commit()
@@ -60,6 +56,7 @@ class Student(Base):
             request = await db_session.execute(sql)
             await db_session.commit()
             return request
+
     @classmethod
     async def get_number_by_tg(cls, session_maker: sessionmaker,
                                tg_id: int, status: int = 1) -> 'Student':
