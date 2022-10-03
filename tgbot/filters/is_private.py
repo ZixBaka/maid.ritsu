@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 
 
+# TODO: fix it pls =)
 class IsPrivate(BoundFilter):
 
     key = "is_private"

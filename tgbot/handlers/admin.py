@@ -3,12 +3,15 @@ import asyncio
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
+from aiogram.utils.exceptions import BotBlocked
 
 from tgbot.keyboards.admin_kb import admin_menu, admin_cars_keyboard, admin_menu_call_data, admin_cars_call_data, \
-    admin_drivers_keyboard, admin_driver_call_data
+    admin_drivers_keyboard, admin_driver_call_data, start_chat_kb
+from tgbot.keyboards.inline import feedback_keyboard
 from tgbot.misc.states import AdminStates
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
+from tgbot.misc.states import Menu
 
 
 async def admin_start(message: Message):
@@ -16,7 +19,7 @@ async def admin_start(message: Message):
     await AdminStates.in_admin_panel.set()
 
 
-async def send_chat(call: CallbackQuery, state: FSMContext):
+async def send_chat(call: CallbackQuery):
     await call.message.answer("telegram id is needed")
     await AdminStates.selecting_partner_for_chatting.set()
 
@@ -37,11 +40,10 @@ async def admin_cars(call: CallbackQuery):
 async def admin_find_car_number(msg: Message):
     session_maker = msg.bot.get("db")
     cars = await Car.get_cars(session_maker=session_maker, car_number=msg.text)
-    if len(cars )== 0:
+    if len(cars) == 0:
         await msg.answer("Looks like car with this number doesn't exist")
     else:
         for c in cars:
-            a = c.car_number
             status = "enabled"
             if c.status == 0:
                 status = "disabled"
@@ -80,25 +82,27 @@ async def admin_drivers(call: CallbackQuery):
 
 
 async def admin_find_driver(msg: Message):
+    try:
+        student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
+        if student is None:
+            await msg.answer("Student with this id doesn't exist in our database")
+        else:
+            cars = await Car.get_all_by_tg(session_maker=msg.bot.get("db"), tg_id=student.tg_id)
 
-    student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
-    if student is None:
-        await msg.answer("Student with this id doesn't exist in our database")
-    else:
-        cars = await Car.get_all_by_tg(session_maker=msg.bot.get("db"), tg_id=student.tg_id)
+            status = "active"
+            if student.status == 0:
+                status = "banned"
 
-        status = "active"
-        if student.status == 0:
-            status = "banned"
-
-        car_nums = "\n\n"
-        for c in cars:
-            car_nums += "<code>" + str(c.car_order) + " " + c.car_number + "\n\n</code>"
-        await msg.answer(f'Student id: <code>{student.tg_id}</code>\n\n'
-                         f'Student first name: <code>{student.first_name}</code>\n\n'
-                         f'Student phone number: <code>{student.phone_number}</code>\n\n'
-                         f'Student status: <code>{status}</code>\n\n'
-                         f'Cars: {car_nums}', reply_markup=admin_drivers_keyboard(student.tg_id))
+            car_nums = "\n\n"
+            for c in cars:
+                car_nums += "<code>" + str(c.car_order) + " " + c.car_number + "\n\n</code>"
+            await msg.answer(f'Student id: <code>{student.tg_id}</code>\n\n'
+                             f'Student first name: <code>{student.first_name}</code>\n\n'
+                             f'Student phone number: <code>{student.phone_number}</code>\n\n'
+                             f'Student status: <code>{status}</code>\n\n'
+                             f'Cars: {car_nums}', reply_markup=admin_drivers_keyboard(student.tg_id))
+    except ValueError:
+        await msg.answer("It's not an ID bruh")
 
 
 async def ban_driver(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -121,16 +125,65 @@ async def unban_driver(call: CallbackQuery, callback_data: dict, state: FSMConte
 
 async def hide(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-
     if state != "":
-         await state.finish()
+        await state.finish()
+
+
+# ================ADMIN CHAT===================
+async def chat_start(call: CallbackQuery):
+    await call.message.answer("ALright, send me the driver's id ")
+    await call.answer()
+    await AdminStates.chat.set()
+
+
+async def to_chat_results(msg: Message, state: FSMContext):
+    try:
+        student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
+        if student is None:
+            await msg.answer("Student with this id doesn't exist in our database")
+            await state.finish()
+        else:
+            await msg.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(msg.text)))
+            await state.finish()
+    except ValueError:
+        await msg.answer("It's not an ID bruh")
+
+
+async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):
+    driver_id = callback_data.get("driver")
+
+    start_text = f"🟢<b>The dialogue has begun</b>💬\n" \
+                 f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
+
+    start_text_r = f"🟢<b>ADMIN started dialogue with you</b>💬\n" \
+                   f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
+    # who called
+    try:
+        await call.message.edit_text(start_text)
+        await call.message.edit_reply_markup(feedback_keyboard)
+
+        await call.message.bot.send_message(driver_id, start_text_r, reply_markup=feedback_keyboard)
+
+        await state.storage.set_state(chat=driver_id, user=driver_id, state=Menu.start_chat.state)
+        await state.storage.set_data(chat=driver_id, user=driver_id, data=dict(partner=call.from_user.id))
+
+        await Menu.start_chat.set()
+
+        await state.update_data(dict(partner=driver_id))
+    except BotBlocked:
+        await call.message.answer('Bot was blocked by the user :/')
+        await state.finish()
 
 
 def register_admin(dp: Dispatcher):
     dp.register_message_handler(admin_start, state=["*", ""], commands=["admin"], is_admin=True)
     # =======Chat======
-
-
+    dp.register_callback_query_handler(chat_start,
+                                       admin_menu_call_data.filter(action="start_chat"),
+                                       state=AdminStates.in_admin_panel)
+    dp.register_message_handler(to_chat_results, state=AdminStates.chat)
+    dp.register_callback_query_handler(chat, admin_driver_call_data.filter(action='start_discussion'))
+    dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
     # =======Cars======
     dp.register_callback_query_handler(admin_cars, admin_menu_call_data.filter(action="find_car"),
                                        state=AdminStates.in_admin_panel, is_admin=True)
@@ -151,5 +204,3 @@ def register_admin(dp: Dispatcher):
     # ========Universal button=======
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"), state=["*", ""],
                                        is_admin=True)
-
-

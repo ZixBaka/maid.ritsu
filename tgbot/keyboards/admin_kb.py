@@ -3,7 +3,6 @@ from aiogram.utils.callback_data import CallbackData
 
 admin_menu_call_data = CallbackData("menu", "action")
 
-
 admin_menu = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='💬Start chat', callback_data=admin_menu_call_data.new(action="start_chat"))
@@ -29,8 +28,7 @@ def admin_cars_keyboard(order: int):
                 action="disable", order=order)),
             InlineKeyboardButton(text='🔓Enable', callback_data=admin_cars_call_data.new(
                 action="enable", order=order))
-        ]
-        ,
+        ],
         [
             InlineKeyboardButton(text='🗑Delete', callback_data=admin_cars_call_data.new(
                 action="delete", order=order))
@@ -47,10 +45,12 @@ admin_driver_call_data = CallbackData("drivers", "action", "driver")
 def admin_drivers_keyboard(driver_id: int):
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text='🔒Ban', callback_data=admin_driver_call_data.new(action="ban_driver",
-                                                                                       driver=driver_id)),
-            InlineKeyboardButton(text='🔓Unban', callback_data=admin_driver_call_data.new(action="unban_driver",
-                                                                                         driver=driver_id))
+            InlineKeyboardButton(text='🔒Ban',
+                                 callback_data=admin_driver_call_data.new(action="ban_driver",
+                                                                          driver=driver_id)),
+            InlineKeyboardButton(text='🔓Unban',
+                                 callback_data=admin_driver_call_data.new(action="unban_driver",
+                                                                          driver=driver_id))
         ],
         [
             InlineKeyboardButton(text='👁Hide', callback_data=admin_menu_call_data.new(action="hide"))
@@ -76,7 +76,11 @@ confirmation_button = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text="")]
 ])
 
-#
-# admin_callback_data = InlineKeyboardMarkup(inline_keyboard=[
-#     [InlineKeyboardButton(text="💬", )]
-# ])
+
+def start_chat_kb(driver_id):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💬Start chat",
+                              callback_data=admin_driver_call_data.new(action="start_discussion", driver=driver_id))],
+        [InlineKeyboardButton(text='👁Hide', callback_data=admin_menu_call_data.new(action="hide"))]
+    ])
+    return keyboard

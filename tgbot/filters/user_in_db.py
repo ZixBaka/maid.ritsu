@@ -32,8 +32,5 @@ class UserInDB(BoundFilter):
                 return data
             elif self.in_db is False:
                 return False
-<<<<<<< HEAD
-=======
-
 
 
