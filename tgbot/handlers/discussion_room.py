@@ -26,6 +26,30 @@ async def feedback_discussion(msg: Message):
                 ), reply_markup=admin_feedback_keyboard(msg.from_user.id))
 
 
+async def discussion_with_admin(msg: Message):
+    config: Config = msg.bot.get("config")
+
+    await msg.bot.send_message(
+        config.tg_bot.admins_group,
+        "".join([f"<b>From user:\n [<code>{msg.from_user.id}</code>]\n"
+                 f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
+                 f"<i>{msg.text}</i>"]
+                ))
+
+
+async def discussion_with_admin_finish(msg: Message, state: FSMContext):
+    config: Config = msg.bot.get("config")
+
+    await msg.bot.send_message(
+        config.tg_bot.admins_group,
+        "".join([f"<b>From user:\n [<code>{msg.from_user.id}</code>]\n"
+                 f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
+                 f"<code>Player finished the conversation</code>"]
+                ))
+    await state.storage.finish(chat=config.tg_bot.admins_group, user=config.tg_bot.admins_group)
+    await state.finish()
+
+
 # ============= SEARCH =====================
 async def start_search(msg: Message):
     await Menu.search_number.set()
@@ -88,12 +112,19 @@ async def notify_user(call: CallbackQuery, callback_data: dict, state: FSMContex
                   f"\n" \
                   f"🙏Please come to your car\n" \
                   f"👤Request from: <code>{requester.car_number.upper()}</code>"
-    await call.message.bot.send_message(car_owner.owner, notify_text, disable_web_page_preview=True,
+    try:
+        await call.message.bot.send_message(car_owner.owner, notify_text, disable_web_page_preview=True,
                                         reply_markup=on_my_way(call.from_user.id, requester.car_number))
+        await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.search_number)
 
-    await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.search_number)
+        await call.answer('👮‍♂We have notified her/him🛎', show_alert=True)
 
-    await call.answer('👮‍♂We have notified her/him🛎', show_alert=True)
+    except BotBlocked:
+
+        await call.message.answer("<code>Bot has been blocked by this user🤦‍♂️"
+                                  "We are not able to connect you with such drivers</code>")
+        await call.message.delete()
+        await state.finish()
 
 
 async def ignore_request(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -136,7 +167,7 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
     start_text = f"🟢<b>The dialogue has begun</b>💬\n" \
                  f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
 
-    start_text_r = f"🟢<b>Someone (<code>{requester.car_number}</code>) started dialogue with you</b>💬\n" \
+    start_text_r = f"🟢<b>A driver(<code>{requester.car_number}</code>) started dialogue with you</b>💬\n" \
                    f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
     try:
         await call.message.edit_text(start_text)
@@ -195,8 +226,11 @@ async def error_late_start(call: CallbackQuery):
 
 
 def discussion_handlers(dp: Dispatcher):
+
     # ========= FEEDBACK ==========
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
+    dp.register_message_handler(discussion_with_admin_finish, commands="finish", state=Menu.in_discussion_with_admin)
+    dp.register_message_handler(discussion_with_admin, state=Menu.in_discussion_with_admin)
 
     # ========= Notify ==========
     dp.register_callback_query_handler(notify_user, car_callback.filter(method="notify"), state=Menu.search_number)
@@ -215,6 +249,7 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(start_chatting, car_callback.filter(method="enter_room"),
                                        state=Menu.search_number)
     dp.register_message_handler(send_message, state=Menu.start_chat)
+
     # ======== ERRORS =========
     dp.register_callback_query_handler(error_late_start, car_callback.filter(method="enter_room"),
                                        state=Menu.start_chat)

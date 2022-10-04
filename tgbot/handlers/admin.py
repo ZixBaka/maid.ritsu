@@ -5,6 +5,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.exceptions import BotBlocked
 
+from tgbot.config import Config
 from tgbot.keyboards.admin_kb import admin_menu, admin_cars_keyboard, admin_menu_call_data, admin_cars_call_data, \
     admin_drivers_keyboard, admin_driver_call_data, start_chat_kb
 from tgbot.keyboards.inline import feedback_keyboard
@@ -147,7 +148,7 @@ async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):
                  f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
 
     start_text_r = f"🟢<b>ADMIN started dialogue with you</b>💬\n" \
-                   f"<i>You can write messages and they will be\nsent to the owner of the car</i>"
+                   f"<b>All your messages will be redirected to admin from now</b>"
     # who called
     try:
         await call.message.edit_text(start_text)
@@ -155,15 +156,43 @@ async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):
 
         await call.message.bot.send_message(driver_id, start_text_r, reply_markup=feedback_keyboard)
 
-        await state.storage.set_state(chat=driver_id, user=driver_id, state=Menu.start_chat.state)
-        await state.storage.set_data(chat=driver_id, user=driver_id, data=dict(partner=call.from_user.id))
+        await state.storage.set_state(chat=driver_id, user=driver_id, state=Menu.in_discussion_with_admin.state)
 
-        await Menu.start_chat.set()
+        await AdminStates.in_discussion_with_reporter.set()
 
-        await state.update_data(dict(partner=driver_id))
+        await state.update_data(dict(reporter=driver_id))
+
     except BotBlocked:
         await call.message.answer('Bot was blocked by the user :/')
         await state.finish()
+
+
+async def discussion_with_reporter(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    reporter = data.get("reporter")
+    try:
+        await msg.bot.send_message(
+            int(reporter),
+            f"<b>Admin</b>"
+            f"\n\n<i>{msg.text}</i>"
+            f"\n\n\n /finish to finish the conversation")
+
+    except BotBlocked:
+        await msg.reply("The bot blocked by user")
+        await state.finish()
+
+
+async def finish_discussion(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    reporter = int(data.get("reporter"))
+
+    await msg.bot.send_message(
+        reporter,
+        f"<b>🔴Admin decided to finish conversation </b>")
+
+    await state.storage.finish(chat=reporter, user=reporter)
+    await state.finish()
+
 
 
 def register_admin(dp: Dispatcher):
@@ -174,6 +203,11 @@ def register_admin(dp: Dispatcher):
                                        state=AdminStates.in_admin_panel)
     dp.register_callback_query_handler(chat, admin_driver_call_data.filter(
         action=['start_discussion', "start_chat"]))
+
+    dp.register_message_handler(discussion_with_reporter, commands="finish",
+                                state=AdminStates.in_discussion_with_reporter)
+
+    dp.register_message_handler(discussion_with_reporter, state=AdminStates.in_discussion_with_reporter)
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
 
     # =======Cars======
