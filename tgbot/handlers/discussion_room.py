@@ -10,6 +10,7 @@ from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
 from aiogram.utils.exceptions import BotBlocked
+from tgbot.misc.states import AdminStates
 
 
 # ============= FEEDBACK =====================
@@ -199,7 +200,7 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(ignore_request, ignore_callback.filter(method='ignore'),
                                        state=Menu.search_number)
     # ========= CHAT ==========
-    dp.register_message_handler(finish, commands="finish", state=Menu.start_chat)
+    dp.register_message_handler(finish, commands="finish", state=[Menu.start_chat, AdminStates.chat])
     dp.register_callback_query_handler(cancel_chatting, text="back_to_menu",
                                        state=Menu.start_chat)
     dp.register_callback_query_handler(cancel_searching, text="cancel_chatting",
@@ -213,7 +214,6 @@ def discussion_handlers(dp: Dispatcher):
                                        state=Menu.start_chat)
 
     # ========= SEARCH ==========
-    # TODO: connect is_private to search as you fix it
     dp.register_message_handler(start_search, commands='search', in_db=True,
                                 state="*", is_private=True)
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
