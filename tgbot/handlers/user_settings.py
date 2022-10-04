@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from asyncio import sleep
 
 from tgbot.keyboards.inline import main_car_inline_keyboard, separate_car_inline_keyboard, car_callback, \
- confirm_delete_kb, main_phone_inline_keyboard, delete_number_kb, back_inline_car
+ confirm_delete_kb, main_phone_inline_keyboard, delete_number_kb, back_inline_car, car_list
 from tgbot.keyboards.reply import give_contact_kb
 
 from tgbot.misc.states import Menu, RegisterUser
@@ -16,13 +16,15 @@ from tgbot.handlers.user_menu import settings
 
 # =========== CARS ==================
 async def check_cars(call: CallbackQuery):
-    print('here!')
     cars = await Car.get_all_by_tg(call.bot.get("db"), call.from_user.id)
+    c = []
     for i in cars:
-        await call.message.answer(f"🚗Your car is <code>{i.car_number}</code>",
-                                  reply_markup=separate_car_inline_keyboard(i.car_number))
-        await call.answer()
-    await call.answer("🟡You don't seem to have any cars in the database. Please add a car", show_alert=True)
+        c.append(i.car_number)
+    if c == list():
+        await call.answer("🟡You don't seem to have any cars in the database. Please add a car", show_alert=True)
+        return None
+    await call.message.edit_text('🗒Here is your list of cars🚘', reply_markup=car_list(c))
+    await call.answer()
 
 
 async def cars_settings(call: CallbackQuery):
@@ -53,6 +55,13 @@ async def car_number_exist(msg: Message):
         reply_markup=main_car_inline_keyboard)
 
 
+async def chosen_car_menu(call: CallbackQuery, callback_data: dict):
+    car_number = callback_data.get("number")
+    await call.message.edit_text(f'What are we going to do with <code>{car_number}</code>?',
+                                 reply_markup=separate_car_inline_keyboard(car_number))
+    await call.answer()
+
+
 async def delete_the_car(call: CallbackQuery, callback_data: dict):
     car_number = callback_data.get("number")
     if await Car.get_car(call.bot.get("db"), car_number) is None:
@@ -74,8 +83,8 @@ async def check_number(call: CallbackQuery):
     number = await Student.get_number_by_tg(call.bot.get("db"), call.from_user.id)
     try:
         assert number != "" and number is not None
-        await call.message.answer(f"☎Your number: {number}",
-                                  reply_markup=delete_number_kb)
+        await call.message.edit_text(f"☎Your number: <code>{number}</code>",
+                                     reply_markup=delete_number_kb)
         await call.answer()
     except AssertionError:
         await call.answer("🟡You don't seem to have a number in the database.", show_alert=True)
@@ -85,7 +94,7 @@ async def delete_number(call: CallbackQuery):
     session_maker: sessionmaker = call.bot.get("db")
     await Student.remove_number(session_maker, call.from_user.id)
     await call.answer('🟢Number was deleted successfully', show_alert=True)
-    await hide_sub_menu(call)
+    await phone_settings(call)
 
 
 async def add_number(call: CallbackQuery):
@@ -118,10 +127,6 @@ async def cancel_phone_registration(msg: Message, state: FSMContext):
 
 
 # =========== QUICK DELETE  ==================
-async def hide_sub_menu(call: CallbackQuery):
-    await call.message.delete()
-
-
 async def confirm_delete(call: CallbackQuery):
     warning_text = f"<b>⚠BE CAREFUL</b>\n\n" \
                    f"<i>After deleting the data, you will not be able to use the Bot's services.</i>" \
@@ -151,16 +156,17 @@ def user_settings_handlers(dp: Dispatcher):
                                 car_in_db=False, is_valid_car=True)
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT, state=Menu.add_car,
                                 car_in_db=True)
+    dp.register_callback_query_handler(chosen_car_menu, car_callback.filter(method="open"))
     dp.register_callback_query_handler(delete_the_car, car_callback.filter(method="delete"))
-    dp.register_callback_query_handler(hide_sub_menu, car_callback.filter(method='hide'))
+    dp.register_callback_query_handler(check_cars, car_callback.filter(method='hide'))
     dp.register_callback_query_handler(cars_settings, state=Menu.add_car, text='to_settings')
-
+    dp.register_callback_query_handler(cars_settings, text='car_list_back')
     #  ============ PHONE ============
     dp.register_callback_query_handler(phone_settings, text='my_phone')
     dp.register_callback_query_handler(settings, text='close_phone')
     dp.register_callback_query_handler(check_number, text='check_my_number')
     dp.register_callback_query_handler(delete_number, text='delete_number')
-    dp.register_callback_query_handler(hide_sub_menu, text='hide_number')
+    dp.register_callback_query_handler(phone_settings, text='hide_number')
     dp.register_callback_query_handler(add_number, text='add_number')
 
     dp.register_message_handler(cancel_phone_registration,

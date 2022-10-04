@@ -138,3 +138,13 @@ class Car(Base):
             request = await db_session.execute(sql)
             await db_session.commit()
             return request
+
+    # TODO: remake it pls =)
+    @classmethod
+    async def delete_car(cls, session_maker: sessionmaker,
+                         car_number: str):
+        async with session_maker() as db_session:
+            sql = delete(cls).where(cls.car_number == car_number)
+            result = await db_session.execute(sql)
+            await db_session.commit()
+            return result
