@@ -10,6 +10,7 @@ from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
 from aiogram.utils.exceptions import BotBlocked
+from tgbot.misc.states import AdminStates
 
 
 # ============= FEEDBACK =====================
@@ -187,10 +188,6 @@ async def error_late_start(call: CallbackQuery):
     await call.answer('🟡The chat has already started')
 
 
-async def error_late_finish(call: CallbackQuery):
-    await call.answer('🟡The chat has already finished or you restarted the bot')
-
-
 def discussion_handlers(dp: Dispatcher):
     # ========= FEEDBACK ==========
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
@@ -203,7 +200,7 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(ignore_request, ignore_callback.filter(method='ignore'),
                                        state=Menu.search_number)
     # ========= CHAT ==========
-    dp.register_message_handler(finish, commands="finish", state=Menu.start_chat)
+    dp.register_message_handler(finish, commands="finish", state=[Menu.start_chat, AdminStates.chat])
     dp.register_callback_query_handler(cancel_chatting, text="back_to_menu",
                                        state=Menu.start_chat)
     dp.register_callback_query_handler(cancel_searching, text="cancel_chatting",
@@ -215,10 +212,8 @@ def discussion_handlers(dp: Dispatcher):
     # ======== ERRORS =========
     dp.register_callback_query_handler(error_late_start, car_callback.filter(method="enter_room"),
                                        state=Menu.start_chat)
-    dp.register_callback_query_handler(error_late_finish, text="back_to_menu")
 
     # ========= SEARCH ==========
-    # TODO: connect is_private to search as you fix it
     dp.register_message_handler(start_search, commands='search', in_db=True,
                                 state="*", is_private=True)
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)

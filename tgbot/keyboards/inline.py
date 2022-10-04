@@ -66,6 +66,11 @@ feedback_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     resize_keyboard=True
 )
 
+feedback_keyboard_after = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="🏁Finish", callback_data="back_to_menu_after")]],
+    resize_keyboard=True
+)
+
 
 confirm_delete_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='🗑Yes, I want to clear my data', callback_data='positive_delete')],

@@ -50,7 +50,7 @@ def register_all_handlers(dp):
     user_registration_handlers(dp)
     register_admin(dp)
     user_menu_handlers(dp)
-    # register_unhandled_call(dp)
+    register_unhandled_call(dp)
 
 
 async def set_default_commands(dp):

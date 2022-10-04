@@ -82,7 +82,7 @@ async def admin_drivers(call: CallbackQuery):
     await AdminStates.search_driver.set()
 
 
-async def admin_find_driver(msg: Message):
+async def admin_find_driver(msg: Message, state: FSMContext):
     try:
         student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
         if student is None:
@@ -103,6 +103,7 @@ async def admin_find_driver(msg: Message):
                              f'Student status: <code>{status}</code>\n\n'
                              f'Cars: {car_nums}',
                              reply_markup=admin_drivers_keyboard(student.tg_id, student.tg_id))
+            await state.finish()
     except ValueError:
         await msg.answer("It's not an ID bruh")
 
@@ -184,7 +185,8 @@ def register_admin(dp: Dispatcher):
                                        admin_menu_call_data.filter(action="start_chat"),
                                        state=AdminStates.in_admin_panel)
     dp.register_message_handler(to_chat_results, state=AdminStates.chat)
-    dp.register_callback_query_handler(chat, admin_driver_call_data.filter(action='start_discussion'))
+    dp.register_callback_query_handler(chat, admin_driver_call_data.filter(
+        action=['start_discussion', "start_chat"]))
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
 
     # =======Cars======
