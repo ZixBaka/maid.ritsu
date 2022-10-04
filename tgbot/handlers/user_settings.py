@@ -64,10 +64,11 @@ async def chosen_car_menu(call: CallbackQuery, callback_data: dict):
 
 async def delete_the_car(call: CallbackQuery, callback_data: dict):
     car_number = callback_data.get("number")
-    if await Car.get_car(call.bot.get("db"), car_number) is None:
+    car = await Car.get_car(call.bot.get("db"), car_number)
+    if car is None:
         await call.answer("🔴You don't own this car!", show_alert=True)
     else:
-        await Car.delete_car(call.bot.get("db"), car_number)
+        await car.update_status_by_order(call.bot.get("db"), order=car.car_order, status=dict(status=0))
         await call.answer('🟢Car was successfully deleted🗑', show_alert=True)
         await call.message.delete()
 

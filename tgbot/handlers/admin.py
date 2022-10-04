@@ -133,23 +133,10 @@ async def hide(call: CallbackQuery, state: FSMContext):
 
 
 # ================ADMIN CHAT===================
-async def chat_start(call: CallbackQuery):
-    await call.message.answer("Alright, send me the driver's id ")
-    await call.answer()
-    await AdminStates.chat.set()
-
-
-async def to_chat_results(msg: Message, state: FSMContext):
-    try:
-        student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
-        if student is None:
-            await msg.answer("Student with this id doesn't exist in our database")
-            await state.finish()
-        else:
-            await msg.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(msg.text)))
-            await state.finish()
-    except ValueError:
-        await msg.answer("It's not an ID bruh")
+async def chat_start(call: CallbackQuery, callback_data: dict):
+    driver = callback_data.get("driver")
+    student = await Student.get_any_student(session_maker=call.bot.get("db"), tg_id=int(driver))
+    await call.message.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(msg.text)))
 
 
 async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):
@@ -184,7 +171,6 @@ def register_admin(dp: Dispatcher):
     dp.register_callback_query_handler(chat_start,
                                        admin_menu_call_data.filter(action="start_chat"),
                                        state=AdminStates.in_admin_panel)
-    dp.register_message_handler(to_chat_results, state=AdminStates.chat)
     dp.register_callback_query_handler(chat, admin_driver_call_data.filter(
         action=['start_discussion', "start_chat"]))
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))

@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.dispatcher import FSMContext
 
 from tgbot.keyboards.inline import settings_keyboard, about_us_keyboard, \
-    main_menu_keyboard, feedback_keyboard_after
+    main_menu_keyboard, feedback_keyboard_after, report_keyboad
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
@@ -85,6 +85,12 @@ async def helper(msg: Message):
                 f"(spam, fraud) is punishable by a <b>BAN</b>"
     await msg.answer(help_text)
 
+
+async def reporter(msg: Message):
+    text = "If you have been faced on of the troubles below \n" \
+           "Please, choose related one and admins will do their best to solve it!"
+
+    await msg.answer(text, reply_markup=report_keyboad)
 
 def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(settings, text="settings", in_db=True, call_is_private=True)

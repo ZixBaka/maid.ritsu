@@ -33,6 +33,10 @@ async def start_search(msg: Message):
                      'parking lot', reply_markup=back_inline_car)
 
 
+async def start_search_without_car(msg: Message):
+    await Menu.search_number.set()
+    await msg.answer('You can not search a car without having one!')
+
 async def search_owner(msg: Message, cars: [Car]):
     for car in cars:
         session_maker = msg.bot.get("db")
@@ -49,7 +53,7 @@ async def search_owner(msg: Message, cars: [Car]):
         await msg.answer('🔍The owner was not found😕')
 
 
-async def stop_search(call: CallbackQuery, state=FSMContext):
+async def stop_search(call: CallbackQuery, state: FSMContext):
     await state.finish()
     await call.answer('🔻Search has stopped')
     await call.message.delete()
@@ -72,7 +76,7 @@ async def notify_user(call: CallbackQuery, callback_data: dict, state: FSMContex
 
     session_maker = call.bot.get("db")
     car_owner = await Car.get_car(session_maker, car_number)
-    requester = await Car.get_car_by_tg(session_maker, call.from_user.id)
+    requester = await Car.get_car_by_tg(session_maker, int(call.from_user.id))
 
     await call.message.edit_reply_markup(found_driver_keyboard_extra(car_number))
 
@@ -215,7 +219,9 @@ def discussion_handlers(dp: Dispatcher):
 
     # ========= SEARCH ==========
     dp.register_message_handler(start_search, commands='search', in_db=True,
-                                state="*", is_private=True)
+                                state="*", is_private=True, has_car=True)
+    dp.register_message_handler(start_search_without_car, commands='search', in_db=True, state="*", is_private=True)
+
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
     dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
 

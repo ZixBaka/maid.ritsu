@@ -56,8 +56,9 @@ class Car(Base):
     @classmethod
     async def get_car_by_tg(cls, session_maker: sessionmaker,
                             tg_id: int, status: int = 1) -> 'Car':
+
         async with session_maker() as db_session:
-            sql = select(cls).where(and_(cls.owner == tg_id, cls.status == status))
+            sql = select(cls).where(cls.owner == tg_id, cls.status == status)
             request = await db_session.execute(sql)
             car: cls = request.scalar()
             await db_session.commit()
@@ -139,7 +140,6 @@ class Car(Base):
             await db_session.commit()
             return request
 
-    # TODO: remake it pls =)
     @classmethod
     async def delete_car(cls, session_maker: sessionmaker,
                          car_number: str):
