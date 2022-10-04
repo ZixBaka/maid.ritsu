@@ -1,12 +1,11 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
+from tgbot.models.students import Student
+
 admin_menu_call_data = CallbackData("menu", "action")
 
 admin_menu = InlineKeyboardMarkup(inline_keyboard=[
-    [
-        InlineKeyboardButton(text='💬Start chat', callback_data=admin_menu_call_data.new(action="start_chat"))
-    ],
     [
         InlineKeyboardButton(text='🔎Find a car', callback_data=admin_menu_call_data.new(action="find_car")),
         InlineKeyboardButton(text='🔎Find a driver', callback_data=admin_menu_call_data.new(action="find_driver"))
@@ -20,12 +19,19 @@ admin_menu = InlineKeyboardMarkup(inline_keyboard=[
 
 admin_cars_call_data = CallbackData("menu", "action", "order")
 
+admin_driver_call_data = CallbackData("drivers", "action", "driver")
 
-def admin_cars_keyboard(order: int):
+
+def admin_cars_keyboard(order: int, tg_id: int):
     return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text='💬Start chat',
+                                 callback_data=admin_driver_call_data.new(action="start_chat", driver=tg_id))
+        ],
         [
             InlineKeyboardButton(text='🔒Disable', callback_data=admin_cars_call_data.new(
                 action="disable", order=order)),
+
             InlineKeyboardButton(text='🔓Enable', callback_data=admin_cars_call_data.new(
                 action="enable", order=order))
         ],
@@ -39,11 +45,14 @@ def admin_cars_keyboard(order: int):
     ], resize_keyboard=True)
 
 
-admin_driver_call_data = CallbackData("drivers", "action", "driver")
-
-
-def admin_drivers_keyboard(driver_id: int):
+def admin_drivers_keyboard(driver_id: int, tg_id: int):
     return InlineKeyboardMarkup(inline_keyboard=[
+
+        [
+            InlineKeyboardButton(text='💬Start chat',
+                                 callback_data=admin_driver_call_data.new(action="start_chat", driver=tg_id))
+        ],
+
         [
             InlineKeyboardButton(text='🔒Ban',
                                  callback_data=admin_driver_call_data.new(action="ban_driver",

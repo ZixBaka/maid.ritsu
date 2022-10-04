@@ -24,9 +24,10 @@ class Student(Base):
             return result
 
     @classmethod
-    async def get_student(cls, session_maker: sessionmaker, tg_id: int) -> 'Student':
+    async def get_student(cls, session_maker: sessionmaker, tg_id: int, status: int = 1) -> 'Student':
+
         async with session_maker() as db_session:
-            sql = select(cls).where(cls.tg_id == tg_id)
+            sql = select(cls).where(and_(cls.tg_id == tg_id, cls.status == status))
             request = await db_session.execute(sql)
             student: cls = request.scalar()
             await db_session.commit()

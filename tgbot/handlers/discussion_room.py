@@ -19,7 +19,7 @@ async def feedback_discussion(msg: Message):
     await msg.reply('Your message has been sent👍')
     await msg.bot.send_message(
         config.tg_bot.admins_group,
-        "".join([f"<b>From user:\n <code>{msg.from_user.id}</code>"
+        "".join([f"<b>From user:\n [<code>{msg.from_user.id}</code>]\n"
                  f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
                  f"<i>{msg.text}</i>"]
                 ), reply_markup=admin_feedback_keyboard(msg.from_user.id))
@@ -66,7 +66,7 @@ async def on_my_way_respond(call: CallbackQuery, callback_data: dict):
     await call.message.bot.send_message(tg_id, respond_text)
 
 
-async def notify_user(call: CallbackQuery, callback_data: dict, state=FSMContext):
+async def notify_user(call: CallbackQuery, callback_data: dict, state: FSMContext):
     car_number = callback_data.get("number")
 
     session_maker = call.bot.get("db")
@@ -89,7 +89,7 @@ async def notify_user(call: CallbackQuery, callback_data: dict, state=FSMContext
     await call.answer('👮‍♂We have notified her/him🛎', show_alert=True)
 
 
-async def ignore_request(call: CallbackQuery, callback_data: dict, state=FSMContext):
+async def ignore_request(call: CallbackQuery, callback_data: dict, state: FSMContext):
     partner = callback_data.get("tg_id")
     await call.bot.send_message(partner, "💬The owner chose not to answer you🙁")
     await state.storage.finish(chat=partner, user=partner)
@@ -100,14 +100,14 @@ async def ignore_request(call: CallbackQuery, callback_data: dict, state=FSMCont
 
 
 # ============= CHAT =====================
-async def cancel_searching(call: CallbackQuery, state=FSMContext):
+async def cancel_searching(call: CallbackQuery, state: FSMContext):
     await call.message.answer('🔍Search has stopped🛑')
     await call.answer()
     await state.finish()
     await call.message.delete()
 
 
-async def cancel_chatting(call: CallbackQuery, state=FSMContext):
+async def cancel_chatting(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     partner = data.get("partner")
     await call.bot.send_message(partner, "💬The dialogue was finished🛑")
@@ -171,7 +171,7 @@ async def send_message(msg: Message, state: FSMContext):
         await state.finish()
 
 
-async def finish(msg: Message, state=FSMContext):
+async def finish(msg: Message, state: FSMContext):
     data = await state.get_data()
     partner = data.get("partner")
     await msg.bot.send_message(partner, "💬The dialogue was finished🛑")
@@ -219,8 +219,8 @@ def discussion_handlers(dp: Dispatcher):
 
     # ========= SEARCH ==========
     # TODO: connect is_private to search as you fix it
-    dp.register_message_handler(start_search, commands='search', is_user_valid=True,
-                                state="*")
+    dp.register_message_handler(start_search, commands='search', in_db=True,
+                                state="*", is_private=True)
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
     dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
 

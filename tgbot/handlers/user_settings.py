@@ -44,7 +44,6 @@ async def insert_car_number(msg: Message):
         "<b>🟢Nice! Your new number was recorded!</b>"
     ]), reply_markup=main_car_inline_keyboard)
     await Car.add_car(session_maker, car_number=car_num, owner=msg.from_user.id)
-    await Menu.car_settings.set()
 
 
 async def car_number_exist(msg: Message):
@@ -62,7 +61,6 @@ async def delete_the_car(call: CallbackQuery, callback_data: dict):
         await Car.delete_car(call.bot.get("db"), car_number)
         await call.answer('🟢Car was successfully deleted🗑', show_alert=True)
         await call.message.delete()
-    await Menu.car_settings.set()
 
 
 # ===========    PHONE    ====================
@@ -136,7 +134,7 @@ async def confirm_delete(call: CallbackQuery):
     await call.answer()
 
 
-async def delete_all(call: CallbackQuery, state=FSMContext):
+async def delete_all(call: CallbackQuery, state: FSMContext):
     session_maker: sessionmaker = call.bot.get("db")
     await Car.delete_all_by_tg(session_maker, tg_id=call.from_user.id)
     await Student.remove_number(session_maker, tg_id=call.from_user.id)
@@ -147,30 +145,34 @@ async def delete_all(call: CallbackQuery, state=FSMContext):
 
 def user_settings_handlers(dp: Dispatcher):
     # ============  CAR ============
-    dp.register_callback_query_handler(check_cars, state=Menu.car_settings, text='check_my_cars')
-    dp.register_callback_query_handler(cars_settings, text="my_cars", state=Menu.settings)
-    dp.register_callback_query_handler(settings, state=Menu.car_settings, text="close_car")
-    dp.register_callback_query_handler(add_car, text="add_car", state=Menu.car_settings)
+    dp.register_callback_query_handler(check_cars, text='check_my_cars')
+    dp.register_callback_query_handler(cars_settings, text="my_cars")
+    dp.register_callback_query_handler(settings, text="close_car")
+    dp.register_callback_query_handler(add_car, text="add_car")
     dp.register_message_handler(insert_car_number, content_types=types.ContentType.TEXT, state=Menu.add_car,
                                 car_in_db=False, is_valid_car=True)
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT, state=Menu.add_car,
                                 car_in_db=True)
-    dp.register_callback_query_handler(delete_the_car, car_callback.filter(method="delete"), state=Menu.car_settings)
-    dp.register_callback_query_handler(hide_sub_menu, car_callback.filter(method='hide'), state=Menu.car_settings)
+    dp.register_callback_query_handler(delete_the_car, car_callback.filter(method="delete"))
+    dp.register_callback_query_handler(hide_sub_menu, car_callback.filter(method='hide'))
     dp.register_callback_query_handler(cars_settings, state=Menu.add_car, text='to_settings')
+
     #  ============ PHONE ============
-    dp.register_callback_query_handler(phone_settings, text='my_phone', state=Menu.settings)
-    dp.register_callback_query_handler(settings, text='close_phone', state=Menu.phone_settings)
-    dp.register_callback_query_handler(check_number, state=Menu.phone_settings, text='check_my_number')
-    dp.register_callback_query_handler(delete_number, state=Menu.phone_settings, text='delete_number')
-    dp.register_callback_query_handler(hide_sub_menu, state=Menu.phone_settings, text='hide_number')
-    dp.register_callback_query_handler(add_number, state=Menu.phone_settings, text='add_number')
-    dp.register_message_handler(cancel_phone_registration, state=RegisterUser.insert_phone_number,
+    dp.register_callback_query_handler(phone_settings, text='my_phone')
+    dp.register_callback_query_handler(settings, text='close_phone')
+    dp.register_callback_query_handler(check_number, text='check_my_number')
+    dp.register_callback_query_handler(delete_number, text='delete_number')
+    dp.register_callback_query_handler(hide_sub_menu, text='hide_number')
+    dp.register_callback_query_handler(add_number, text='add_number')
+
+    dp.register_message_handler(cancel_phone_registration,
+                                state=RegisterUser.insert_phone_number,
                                 text='🔙Back')
+
     dp.register_message_handler(register_phone_number,
                                 state=RegisterUser.insert_phone_number, content_types=types.ContentType.CONTACT,
                                 in_db=True, is_forwarded=False)
     # ============  DELETE ============
-    dp.register_callback_query_handler(confirm_delete, state=Menu.settings, text='delete_me')
-    dp.register_callback_query_handler(delete_all, state=Menu.settings, text='positive_delete')
-    dp.register_callback_query_handler(settings, state=Menu.settings, text='negative_delete')
+    dp.register_callback_query_handler(confirm_delete, text='delete_me')
+    dp.register_callback_query_handler(delete_all, text='positive_delete')
+    dp.register_callback_query_handler(settings, text='negative_delete')

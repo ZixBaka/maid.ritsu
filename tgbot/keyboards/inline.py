@@ -46,7 +46,7 @@ main_menu_keyboard = InlineKeyboardMarkup(
                      [InlineKeyboardButton(text="Settings⚙️", callback_data="settings")],
                      [InlineKeyboardButton(text="About us™️", callback_data="about"),
                       InlineKeyboardButton(text="Feedback🛎", callback_data="feedback")],
-                     [InlineKeyboardButton(text='👁Hide', callback_data='hide_menu')]],
+                     [InlineKeyboardButton(text='Close❌', callback_data='hide_menu')]],
     resize_keyboard=True)
 
 settings_keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -105,3 +105,33 @@ def on_my_way_extra(car_number):
         [InlineKeyboardButton(text="💬Start chatting",
                               callback_data=car_callback.new(method="enter_room", number=car_number))]])
     return keyboard
+
+
+report_callback_data = CallbackData("report", "description", "car")
+
+scam_button = InlineKeyboardButton(
+    text="Report scam",
+    callback_data=report_callback_data.new(description="report", car="car")
+)
+
+abuse_button = InlineKeyboardButton(
+    text="Report abuse",
+    callback_data=report_callback_data.new(description="abuse", car="car")
+)
+
+stolen_car_button = InlineKeyboardButton(
+    text="Report stolen car number",
+    callback_data=report_callback_data.new(description="stolen_car", car="car")
+)
+
+other_report_button = InlineKeyboardButton(
+    text="Report stolen car number",
+    callback_data=report_callback_data.new(description="other", car="car")
+)
+report_keyboad = InlineKeyboardMarkup(resize_keyboard=True)
+report_keyboad.add(stolen_car_button)
+report_keyboad.add(scam_button)
+report_keyboad.add(abuse_button)
+report_keyboad.add(other_report_button)
+
+

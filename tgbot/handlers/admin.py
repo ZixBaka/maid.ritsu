@@ -50,7 +50,8 @@ async def admin_find_car_number(msg: Message):
             await msg.answer(f'Order: {c.car_order}\n\n'
                              f'Car number: <code>{c.car_number}</code>\n\n'
                              f'Car owner id: <code>{c.owner}</code>\n\n'
-                             f'Car status: <code>{status}</code>', reply_markup=admin_cars_keyboard(c.car_order))
+                             f'Car status: <code>{status}</code>',
+                             reply_markup=admin_cars_keyboard(c.car_order, c.owner))
             await asyncio.sleep(0.3)
 
 
@@ -100,7 +101,8 @@ async def admin_find_driver(msg: Message):
                              f'Student first name: <code>{student.first_name}</code>\n\n'
                              f'Student phone number: <code>{student.phone_number}</code>\n\n'
                              f'Student status: <code>{status}</code>\n\n'
-                             f'Cars: {car_nums}', reply_markup=admin_drivers_keyboard(student.tg_id))
+                             f'Cars: {car_nums}',
+                             reply_markup=admin_drivers_keyboard(student.tg_id, student.tg_id))
     except ValueError:
         await msg.answer("It's not an ID bruh")
 
@@ -131,7 +133,7 @@ async def hide(call: CallbackQuery, state: FSMContext):
 
 # ================ADMIN CHAT===================
 async def chat_start(call: CallbackQuery):
-    await call.message.answer("ALright, send me the driver's id ")
+    await call.message.answer("Alright, send me the driver's id ")
     await call.answer()
     await AdminStates.chat.set()
 
@@ -184,6 +186,7 @@ def register_admin(dp: Dispatcher):
     dp.register_message_handler(to_chat_results, state=AdminStates.chat)
     dp.register_callback_query_handler(chat, admin_driver_call_data.filter(action='start_discussion'))
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
+
     # =======Cars======
     dp.register_callback_query_handler(admin_cars, admin_menu_call_data.filter(action="find_car"),
                                        state=AdminStates.in_admin_panel, is_admin=True)

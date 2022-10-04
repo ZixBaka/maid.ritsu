@@ -4,7 +4,7 @@ from aiogram.types import Message
 from sqlalchemy.orm import sessionmaker
 
 from tgbot.filters.car_number_validator import IsValidCar
-from tgbot.keyboards.inline import main_menu_keyboard
+from tgbot.keyboards.inline import main_menu_keyboard, report_keyboad
 from tgbot.misc.states import RegisterUser, Menu
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
@@ -20,7 +20,7 @@ async def user_start(msg: Message):
     await RegisterUser.insert_car_number.set()
 
 
-async def register_car_number(msg: Message, state=FSMContext):
+async def register_car_number(msg: Message, state: FSMContext):
     session_maker: sessionmaker = msg.bot.get("db")
     car_num = msg.text.upper().replace(" ", "")
     await msg.reply(f"🥳𝐑𝐄𝐆𝐈𝐒𝐓𝐑𝐀𝐓𝐈𝐎𝐍 𝐈𝐒 𝐎𝐕𝐄𝐑\n\n"
@@ -32,11 +32,15 @@ async def register_car_number(msg: Message, state=FSMContext):
 
 
 async def car_number_exist(msg: Message):
-    await msg.answer(
+    await msg.reply(
         "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>")
 
 
-async def tools(msg: Message):
+async def report_handler(msg: Message):
+    await msg.answer("Please choose, one of the options", reply_markup=report_keyboad)
+
+
+async def main_menu(msg: Message):
     cars = await Car.get_all_by_tg(msg.bot.get("db"), msg.from_user.id)
     car = []
     for r in cars:
@@ -44,14 +48,13 @@ async def tools(msg: Message):
     await msg.answer(f"👤𝐍𝐚𝐦𝐞: <b>{msg.from_user.first_name}</b>\n"
                      f"🚙𝐂𝐚𝐫(𝐬): <code>{'</code> <code>'.join(car)}</code>",
                      reply_markup=main_menu_keyboard)
-    await Menu.in_main_menu.set()
 
 
 async def user_not_in_db(msg: Message):
     await msg.answer("🟡Please, register first!\nUse /register")
 
 
-async def user_restart(msg: Message, state=FSMContext):
+async def user_restart(msg: Message, state: FSMContext):
     await state.finish()
     await msg.answer('🟢Everything was restarted🔄')
 
@@ -61,16 +64,18 @@ async def error_write_correct(msg: Message):
 
 
 def user_registration_handlers(dp: Dispatcher):
-    # TODO: connect is_private to start, me as you fix it
+
     dp.register_message_handler(user_start, commands=["start", "register"], in_db=False,
-                                is_user_valid=True)
-    dp.register_message_handler(user_restart, commands=["restart", "start"], state="*")
-    dp.register_message_handler(tools, commands=['me', 'profile'], in_db=True,
-                                is_user_valid=True)
+                                is_not_banned=True, is_private=True)
+
+    dp.register_message_handler(user_restart, commands=["restart", "start"], state=["*", None, ""], is_private=True)
+
+    dp.register_message_handler(main_menu, commands=['me', 'profile'], in_db=True, is_private=True)
+
     dp.register_message_handler(user_not_in_db, commands=['me', 'profile'], in_db=False, is_private=True)
 
-    dp.register_message_handler(register_car_number, IsValidCar(True), state=RegisterUser.insert_car_number,
-                                car_in_db=False)
+    dp.register_message_handler(register_car_number, state=RegisterUser.insert_car_number,
+                                car_in_db=False, is_private=True)
 
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT,
                                 state=RegisterUser.insert_car_number, car_in_db=True)

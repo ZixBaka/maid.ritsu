@@ -34,3 +34,22 @@ class UserInDB(BoundFilter):
                 return False
 
 
+class IsNotBanned(BoundFilter):
+
+    key = "is_not_banned"
+
+    def __init__(self, is_not_banned: typing.Optional[bool]):
+        self.is_not_banned = is_not_banned
+
+    async def check(self, obj, *args):
+
+        if self.is_not_banned is None:
+
+            return True
+        session_maker: sessionmaker = obj.bot.get('db')
+        telegram_user: types.User = obj.from_user
+        student = await Student.get_student(session_maker, telegram_user.id, status=0)
+        if self.is_not_banned is True:
+            if student is not None:
+                return False
+        return True
