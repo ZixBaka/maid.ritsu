@@ -49,10 +49,11 @@ async def insert_car_number(msg: Message, state: FSMContext):
     await state.finish()
 
 
-async def car_number_exist(msg: Message):
+async def car_number_exist(msg: Message, state: FSMContext):
     await msg.answer(
         "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>",
         reply_markup=main_car_inline_keyboard)
+    await state.finish()
 
 
 async def chosen_car_menu(call: CallbackQuery, callback_data: dict):
@@ -162,6 +163,7 @@ def user_settings_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(check_cars, car_callback.filter(method='hide'))
     dp.register_callback_query_handler(cars_settings, state=Menu.add_car, text='to_settings')
     dp.register_callback_query_handler(cars_settings, text='car_list_back')
+
     #  ============ PHONE ============
     dp.register_callback_query_handler(phone_settings, text='my_phone')
     dp.register_callback_query_handler(settings, text='close_phone')

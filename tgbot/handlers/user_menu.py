@@ -87,10 +87,10 @@ async def helper(msg: Message):
 
 
 async def reporter(msg: Message):
-    text = "If you have been faced on of the troubles below \n" \
-           "Please, choose related one and admins will do their best to solve it!"
-
+    text = "<code>If you have been faced on of the troubles below, \n" \
+           "please, choose related one and admins will do their best to solve it!</code>"
     await msg.answer(text, reply_markup=report_keyboad)
+
 
 def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(settings, text="settings", in_db=True, call_is_private=True)
@@ -100,3 +100,4 @@ def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(exit_to_menu, text="back_to_menu", state=["*", "", None])
     dp.register_callback_query_handler(close_menu, text='hide_menu', in_db=True, call_is_private=True)
     dp.register_message_handler(helper, state=["*", ""], commands='help', in_db=True, is_private=True)
+    dp.register_message_handler(reporter, state=["*", ""], commands='report', in_db=True, is_private=True)

@@ -141,7 +141,7 @@ stolen_car_button = InlineKeyboardButton(
 )
 
 other_report_button = InlineKeyboardButton(
-    text="Report stolen car number",
+    text="Another issue",
     callback_data=report_callback_data.new(description="other", car="car")
 )
 report_keyboad = InlineKeyboardMarkup(resize_keyboard=True)

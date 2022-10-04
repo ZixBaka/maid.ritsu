@@ -33,9 +33,11 @@ async def start_search(msg: Message):
                      'parking lot', reply_markup=back_inline_car)
 
 
-async def start_search_without_car(msg: Message):
+async def start_search_without_car(msg: Message, state: FSMContext):
     await Menu.search_number.set()
     await msg.answer('You can not search a car without having one!')
+    await state.finish()
+
 
 async def search_owner(msg: Message, cars: [Car]):
     for car in cars:

@@ -64,6 +64,7 @@ class Car(Base):
             await db_session.commit()
             return car
 
+
     @classmethod
     async def get_all_active_by_tg(cls, session_maker: sessionmaker,
                                    tg_id: int, status: int = 1):
