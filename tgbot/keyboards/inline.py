@@ -35,9 +35,20 @@ def found_driver_keyboard_extra(car_number: str):
 def separate_car_inline_keyboard(car_number: str):
     temp_inline_keyboard = InlineKeyboardMarkup(row_width=1)
     temp_inline_keyboard.add(
-        InlineKeyboardButton(text='👁Hide', callback_data=car_callback.new(method="hide", number=car_number)),
         InlineKeyboardButton(text="🗑Delete this car",
-                             callback_data=car_callback.new(method="delete", number=car_number)))
+                             callback_data=car_callback.new(method="delete", number=car_number)),
+        InlineKeyboardButton(text='🔙Back', callback_data=car_callback.new(method="hide", number=car_number)))
+    return temp_inline_keyboard
+
+
+def car_list(user_numbers: list):
+    temp_inline_keyboard = InlineKeyboardMarkup(row_width=1)
+    for number in user_numbers:
+        temp_inline_keyboard.add(
+            InlineKeyboardButton(text=number, callback_data=car_callback.new(method="open", number=number))
+        )
+    temp_inline_keyboard.add(
+        InlineKeyboardButton(text='🔙Back', callback_data="car_list_back"))
     return temp_inline_keyboard
 
 
@@ -85,8 +96,8 @@ main_phone_inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 delete_number_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='👁Hide', callback_data='hide_number')],
-    [InlineKeyboardButton(text="🗑Delete", callback_data='delete_number')]
+    [InlineKeyboardButton(text="🗑Delete", callback_data='delete_number')],
+    [InlineKeyboardButton(text='🔙Back', callback_data='hide_number')]
 ])
 
 back_inline_car = InlineKeyboardMarkup(inline_keyboard=[
@@ -138,5 +149,3 @@ report_keyboad.add(stolen_car_button)
 report_keyboad.add(scam_button)
 report_keyboad.add(abuse_button)
 report_keyboad.add(other_report_button)
-
-
