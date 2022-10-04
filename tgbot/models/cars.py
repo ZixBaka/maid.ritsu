@@ -77,9 +77,9 @@ class Car(Base):
 
     @classmethod
     async def get_all_by_tg(cls, session_maker: sessionmaker,
-                            tg_id: int):
+                            tg_id: int, status: int = 1):
         async with session_maker() as db_session:
-            sql = select(cls).where(cls.owner == tg_id)
+            sql = select(cls).where(cls.owner == tg_id, cls.status == status)
             request = await db_session.execute(sql)
             cars: cls = request.scalars()
             await db_session.commit()
