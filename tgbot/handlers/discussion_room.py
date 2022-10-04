@@ -187,10 +187,6 @@ async def error_late_start(call: CallbackQuery):
     await call.answer('🟡The chat has already started')
 
 
-async def error_late_finish(call: CallbackQuery):
-    await call.answer('🟡The chat has already finished or you restarted the bot')
-
-
 def discussion_handlers(dp: Dispatcher):
     # ========= FEEDBACK ==========
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
@@ -215,7 +211,6 @@ def discussion_handlers(dp: Dispatcher):
     # ======== ERRORS =========
     dp.register_callback_query_handler(error_late_start, car_callback.filter(method="enter_room"),
                                        state=Menu.start_chat)
-    dp.register_callback_query_handler(error_late_finish, text="back_to_menu")
 
     # ========= SEARCH ==========
     # TODO: connect is_private to search as you fix it

@@ -3,7 +3,6 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 from sqlalchemy.orm import sessionmaker
 
-from tgbot.filters.car_number_validator import IsValidCar
 from tgbot.keyboards.inline import main_menu_keyboard, report_keyboad
 from tgbot.misc.states import RegisterUser, Menu
 from tgbot.models.cars import Car

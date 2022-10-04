@@ -16,6 +16,7 @@ from tgbot.handlers.user_menu import settings
 
 # =========== CARS ==================
 async def check_cars(call: CallbackQuery):
+    print('here!')
     cars = await Car.get_all_by_tg(call.bot.get("db"), call.from_user.id)
     for i in cars:
         await call.message.answer(f"🚗Your car is <code>{i.car_number}</code>",
@@ -27,7 +28,6 @@ async def check_cars(call: CallbackQuery):
 async def cars_settings(call: CallbackQuery):
     await call.message.edit_text("<b>Okay, what do you want to do with your cars?</b>")
     await call.message.edit_reply_markup(main_car_inline_keyboard)
-    await Menu.car_settings.set()
     await call.answer()
 
 
@@ -37,17 +37,17 @@ async def add_car(call: CallbackQuery):
     await Menu.add_car.set()
 
 
-async def insert_car_number(msg: Message):
+async def insert_car_number(msg: Message, state: FSMContext):
     session_maker: sessionmaker = msg.bot.get("db")
     car_num = msg.text.upper().replace(" ", "")
     await msg.reply("\n".join([
         "<b>🟢Nice! Your new number was recorded!</b>"
     ]), reply_markup=main_car_inline_keyboard)
     await Car.add_car(session_maker, car_number=car_num, owner=msg.from_user.id)
+    await state.finish()
 
 
 async def car_number_exist(msg: Message):
-    await Menu.car_settings.set()
     await msg.answer(
         "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>",
         reply_markup=main_car_inline_keyboard)
@@ -65,7 +65,6 @@ async def delete_the_car(call: CallbackQuery, callback_data: dict):
 
 # ===========    PHONE    ====================
 async def phone_settings(call: CallbackQuery):
-    await Menu.phone_settings.set()
     await call.message.edit_text('<b>Okay, what do you want to do with your number?</b>')
     await call.message.edit_reply_markup(main_phone_inline_keyboard)
     await call.answer()
@@ -95,23 +94,22 @@ async def add_number(call: CallbackQuery):
     await RegisterUser.insert_phone_number.set()
 
 
-async def register_phone_number(msg: Message, student: Student):
+async def register_phone_number(msg: Message, student: Student, state: FSMContext):
     session_maker = msg.bot.get("db")
     updated_student = dict(tg_id=student.tg_id, first_name=msg.contact.first_name,
                            phone_number=msg.contact.phone_number)
     await student.update_client(session_maker, updated_student)
     await msg.reply('🥳Your contact is saved!\nYou can delete it whenever you want',
                     reply_markup=ReplyKeyboardRemove())
+    await state.finish()
     await sleep(3)
     await msg.bot.delete_message(msg.chat.id, msg.message_id + 1)
-    await Menu.phone_settings.set()
     await msg.answer("<b>Okay, what do you want to do with your number?</b>",
                      reply_markup=main_phone_inline_keyboard)
 
 
 async def cancel_phone_registration(msg: Message, state: FSMContext):
     await state.finish()
-    await Menu.phone_settings.set()
     await msg.answer("🤨it seems you've changed your mind", reply_markup=ReplyKeyboardRemove())
     await sleep(2)
     await msg.bot.delete_message(msg.chat.id, msg.message_id+1)
