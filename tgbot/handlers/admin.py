@@ -37,7 +37,7 @@ async def admin_cars(call: CallbackQuery):
     await AdminStates.search_car.set()
 
 
-async def admin_find_car_number(msg: Message):
+async def admin_find_car_number(msg: Message, state: FSMContext):
     session_maker = msg.bot.get("db")
     cars = await Car.get_cars(session_maker=session_maker, car_number=msg.text)
     if len(cars) == 0:
@@ -53,6 +53,7 @@ async def admin_find_car_number(msg: Message):
                              f'Car status: <code>{status}</code>',
                              reply_markup=admin_cars_keyboard(c.car_order, c.owner))
             await asyncio.sleep(0.3)
+    await state.finish()
 
 
 async def disable_car(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -136,7 +137,7 @@ async def hide(call: CallbackQuery, state: FSMContext):
 async def chat_start(call: CallbackQuery, callback_data: dict):
     driver = callback_data.get("driver")
     student = await Student.get_any_student(session_maker=call.bot.get("db"), tg_id=int(driver))
-    await call.message.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(msg.text)))
+    await call.message.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(call.message.text)))
 
 
 async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):

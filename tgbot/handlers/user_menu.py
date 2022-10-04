@@ -8,7 +8,8 @@ from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
 
-async def settings(call: CallbackQuery):
+async def settings(call: CallbackQuery, state: FSMContext):
+    await state.finish()
     await call.message.edit_text(
         "".join(["<b> In this section, you can manage</b>"
                  "<b> information that related to you.</b>"]),

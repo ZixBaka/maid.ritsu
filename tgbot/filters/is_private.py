@@ -12,10 +12,11 @@ class IsPrivate(BoundFilter):
         self.is_private = is_private
 
     async def check(self, obj, *args):
-        if self.is_private is True:
-            return types.ChatType.PRIVATE == obj.chat.type
-        else:
-            return True
+        return True
+            # if self.is_private is True:
+            #     return types.ChatType.PRIVATE == obj.chat.type
+            # else:
+            #     return True
 
 
 class CallIsPrivate(BoundFilter):
@@ -25,8 +26,8 @@ class CallIsPrivate(BoundFilter):
         self.call_is_private = call_is_private
 
     async def check(self, obj, *args):
-        if self.call_is_private is True:
-            return types.ChatType.PRIVATE == obj.message.chat.type
-        else:
-            return True
+        # if self.call_is_private is True:
+        #     return types.ChatType.PRIVATE == obj.message.chat.type
+        # else:
+        return True
 

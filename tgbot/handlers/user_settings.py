@@ -27,7 +27,8 @@ async def check_cars(call: CallbackQuery):
     await call.answer()
 
 
-async def cars_settings(call: CallbackQuery):
+async def cars_settings(call: CallbackQuery, state: FSMContext):
+    await state.finish()
     await call.message.edit_text("<b>Okay, what do you want to do with your cars?</b>")
     await call.message.edit_reply_markup(main_car_inline_keyboard)
     await call.answer()
