@@ -5,9 +5,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.exceptions import BotBlocked
 
-from tgbot.config import Config
 from tgbot.keyboards.admin_kb import admin_menu, admin_cars_keyboard, admin_menu_call_data, admin_cars_call_data, \
-    admin_drivers_keyboard, admin_driver_call_data, start_chat_kb
+    admin_drivers_keyboard, admin_driver_call_data
 from tgbot.keyboards.inline import feedback_keyboard
 from tgbot.misc.states import AdminStates
 from tgbot.models.cars import Car
@@ -135,12 +134,6 @@ async def hide(call: CallbackQuery, state: FSMContext):
 
 
 # ================ADMIN CHAT===================
-async def chat_start(call: CallbackQuery, callback_data: dict):
-    driver = callback_data.get("driver")
-    student = await Student.get_any_student(session_maker=call.bot.get("db"), tg_id=int(driver))
-    await call.message.answer('👤Now you can start chat with them', reply_markup=start_chat_kb(int(call.message.text)))
-
-
 async def chat(call: CallbackQuery, callback_data: dict,  state: FSMContext):
     driver_id = callback_data.get("driver")
 
@@ -182,25 +175,9 @@ async def discussion_with_reporter(msg: Message, state: FSMContext):
         await state.finish()
 
 
-async def finish_discussion(msg: Message, state: FSMContext):
-    data = await state.get_data()
-    reporter = int(data.get("reporter"))
-
-    await msg.bot.send_message(
-        reporter,
-        f"<b>🔴Admin decided to finish conversation </b>")
-
-    await state.storage.finish(chat=reporter, user=reporter)
-    await state.finish()
-
-
-
 def register_admin(dp: Dispatcher):
     dp.register_message_handler(admin_start, state=["*", ""], commands=["admin"], is_admin=True)
     # =======Chat======
-    dp.register_callback_query_handler(chat_start,
-                                       admin_menu_call_data.filter(action="start_chat"),
-                                       state=AdminStates.in_admin_panel)
     dp.register_callback_query_handler(chat, admin_driver_call_data.filter(
         action=['start_discussion', "start_chat"]))
 
@@ -209,7 +186,6 @@ def register_admin(dp: Dispatcher):
 
     dp.register_message_handler(discussion_with_reporter, state=AdminStates.in_discussion_with_reporter)
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
-
     # =======Cars======
     dp.register_callback_query_handler(admin_cars, admin_menu_call_data.filter(action="find_car"),
                                        state=AdminStates.in_admin_panel, is_admin=True)
