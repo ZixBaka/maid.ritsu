@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.dispatcher import FSMContext
 
 from tgbot.keyboards.inline import settings_keyboard, about_us_keyboard, \
-    main_menu_keyboard, feedback_keyboard_after, report_keyboad
+    main_menu_keyboard, feedback_keyboard_after, report_keyboad, report_callback_data
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
@@ -95,6 +95,8 @@ async def reporter(msg: Message, state: FSMContext):
 
 
 def user_menu_handlers(dp: Dispatcher):
+    # TODO: enhance report system
+    dp.register_callback_query_handler(feedback, report_callback_data.filter())
     dp.register_callback_query_handler(settings, text="settings", in_db=True, call_is_private=True)
     dp.register_callback_query_handler(about_us, text="about", in_db=True, call_is_private=True)
     dp.register_callback_query_handler(feedback, text="feedback", in_db=True, call_is_private=True)
