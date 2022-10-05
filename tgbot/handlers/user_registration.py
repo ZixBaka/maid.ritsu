@@ -78,6 +78,7 @@ def user_registration_handlers(dp: Dispatcher):
 
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT,
                                 state=RegisterUser.insert_car_number, car_in_db=True)
+
     # error handler Note: it also handles msgs from other modules
     dp.register_message_handler(error_write_correct,
                                 state=[RegisterUser.insert_car_number,

@@ -224,20 +224,20 @@ async def finish(msg: Message, state: FSMContext):
 
     discussion_content = data.get("discussion_content")
     partner = data.get("partner")
-    await msg.bot.send_message(partner, "💬The dialogue was finished🛑",
-                               reply_markup=discussion_finish_keyboard)
-    await state.storage.finish(chat=partner, user=partner)
 
-    await msg.answer('💬The dialogue was finished🛑',
-                     reply_markup=discussion_finish_keyboard)
+    await msg.bot.send_message(partner, "💬The dialogue was finished🛑", reply_markup=discussion_finish_keyboard)
+
+    await msg.answer('💬The dialogue was finished🛑', reply_markup=discussion_finish_keyboard)
+
+    await state.storage.set_state(chat=partner, user=partner, state=Menu.share_discussion.state)
+    await state.storage.set_data(chat=partner, user=partner, data=dict(discussion_content=discussion_content))
 
     await state.set_state(Menu.share_discussion.state)
-
     await state.update_data(dict(discussion_content=discussion_content))
-    # await state.storage.update_data(chat=msg.chat.id, user=msg.from_user.id,
-    #                                 data=dict(discussion_content))
+
     if discussion_content == "":
         await msg.answer("There is no point to report -_-")
+        await msg.delete()
         await state.finish()
 
 
