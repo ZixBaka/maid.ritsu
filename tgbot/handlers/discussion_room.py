@@ -40,13 +40,27 @@ async def discussion_with_admin(msg: Message):
 async def discussion_with_admin_finish(msg: Message, state: FSMContext):
     config: Config = msg.bot.get("config")
 
+    await msg.answer('Discussion was stopped')
+    await state.finish()
+
+    await state.storage.finish(chat=config.tg_bot.admins_group, user=config.tg_bot.admin_ids[0])
     await msg.bot.send_message(
         config.tg_bot.admins_group,
         "".join([f"<b>From user:\n [<code>{msg.from_user.id}</code>]\n"
                  f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
-                 f"<code>Player finished the conversation</code>"]
+                 f"<code>User finished the conversation</code>"]
                 ))
-    await state.storage.finish(chat=config.tg_bot.admins_group, user=config.tg_bot.admins_group)
+
+
+async def finish_discussion(msg: Message, state: FSMContext):
+    data = await state.get_data()
+    reporter = int(data.get("reporter"))
+
+    await msg.bot.send_message(
+        reporter,
+        f"<b>🔴Admin decided to finish conversation </b>")
+
+    await state.storage.finish(chat=reporter, user=reporter)
     await state.finish()
 
 
@@ -114,7 +128,7 @@ async def notify_user(call: CallbackQuery, callback_data: dict, state: FSMContex
                   f"👤Request from: <code>{requester.car_number.upper()}</code>"
     try:
         await call.message.bot.send_message(car_owner.owner, notify_text, disable_web_page_preview=True,
-                                        reply_markup=on_my_way(call.from_user.id, requester.car_number))
+                                            reply_markup=on_my_way(call.from_user.id, requester.car_number))
         await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.search_number)
 
         await call.answer('👮‍♂We have notified her/him🛎', show_alert=True)
@@ -148,13 +162,11 @@ async def cancel_searching(call: CallbackQuery, state: FSMContext):
 async def cancel_chatting(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     partner = data.get("partner")
-    await call.bot.send_message(partner, "💬The dialogue was finished🛑")
-    await state.storage.finish(chat=partner, user=partner)
-
-    await call.message.answer('💬The dialogue was finished🛑')
-    await call.answer()
+    await call.bot.send_message(partner, "💬The dialogue was finished🛑", reply_markup=discussion_finish_keyboard)
+    await state.storage.set_state(chat=partner, user=partner, state=Menu.share_discussion)
+    await Menu.share_discussion.set()
+    await call.message.answer('💬The dialogue was finished🛑', reply_markup=discussion_finish_keyboard)
     await call.message.delete()
-    await state.finish()
 
 
 async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -226,7 +238,7 @@ async def finish(msg: Message, state: FSMContext):
     partner = data.get("partner")
     await msg.bot.send_message(partner, "💬The dialogue was finished🛑",
                                reply_markup=discussion_finish_keyboard)
-    await state.storage.finish(chat=partner, user=partner)
+    await state.storage.set_state(chat=partner, user=partner, state=Menu.share_discussion)
 
     await msg.answer('💬The dialogue was finished🛑',
                      reply_markup=discussion_finish_keyboard)
@@ -236,6 +248,7 @@ async def finish(msg: Message, state: FSMContext):
     await state.update_data(dict(discussion_content=discussion_content))
     # await state.storage.update_data(chat=msg.chat.id, user=msg.from_user.id,
     #                                 data=dict(discussion_content))
+
     if discussion_content == "":
         await msg.answer("There is no point to report -_-")
         await state.finish()
@@ -258,15 +271,12 @@ async def report_confirmation(call: CallbackQuery, callback_data: dict, state: F
         config: Config = call.bot.get("config")
         data = await state.get_data()
         conversation = data.get("discussion_content")
-        print(conversation)
         await call.bot.send_message(config.tg_bot.admins_group, text=conversation)
+
     elif answer == "no":
         await call.answer("You have decided no to report, discussion history is cleaned")
-
-    await call.message.delete()
     await state.finish()
-
-
+    await call.message.delete()
 
 
 # ============= ERRORS =====================
@@ -278,6 +288,7 @@ def discussion_handlers(dp: Dispatcher):
 
     # ========= FEEDBACK ==========
     dp.register_message_handler(feedback_discussion, state=Menu.feedback)
+    dp.register_message_handler(finish_discussion, commands='finish', state=AdminStates.in_discussion_with_reporter)
     dp.register_message_handler(discussion_with_admin_finish, commands="finish", state=Menu.in_discussion_with_admin)
     dp.register_message_handler(discussion_with_admin, state=Menu.in_discussion_with_admin)
 
@@ -311,9 +322,9 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
     dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
 
-    dp.register_callback_query_handler(report, discussion_finish_call_data.filter(),
+    dp.register_callback_query_handler(report, discussion_finish_call_data.filter(action="report"),
                                        state=Menu.share_discussion)
-    dp.register_callback_query_handler(close, discussion_finish_call_data.filter(),
-                                       state=Menu.share_discussion)
+    dp.register_callback_query_handler(close, discussion_finish_call_data.filter(action="close"),
+                                       state=[Menu.share_discussion, None])
     dp.register_callback_query_handler(report_confirmation, report_agreement_callback_data.filter(),
                                        state=Menu.share_discussion)

@@ -52,8 +52,7 @@ async def insert_car_number(msg: Message, state: FSMContext):
 
 async def car_number_exist(msg: Message, state: FSMContext):
     await msg.answer(
-        "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>",
-        reply_markup=main_car_inline_keyboard)
+        "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>")
     await state.finish()
 
 
@@ -156,7 +155,7 @@ def user_settings_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(settings, text="close_car")
     dp.register_callback_query_handler(add_car, text="add_car")
     dp.register_message_handler(insert_car_number, content_types=types.ContentType.TEXT, state=Menu.add_car,
-                                car_in_db=False, is_valid_car=True)
+                                is_valid_car=True, car_in_db=False)
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT, state=Menu.add_car,
                                 car_in_db=True)
     dp.register_callback_query_handler(chosen_car_menu, car_callback.filter(method="open"))

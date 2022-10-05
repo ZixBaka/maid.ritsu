@@ -74,7 +74,7 @@ def user_registration_handlers(dp: Dispatcher):
     dp.register_message_handler(user_not_in_db, commands=['me', 'profile'], in_db=False, is_private=True)
 
     dp.register_message_handler(register_car_number, state=RegisterUser.insert_car_number,
-                                car_in_db=False, is_private=True)
+                                car_in_db=False, is_private=True, is_valid_car=True)
 
     dp.register_message_handler(car_number_exist, content_types=types.ContentType.TEXT,
                                 state=RegisterUser.insert_car_number, car_in_db=True)

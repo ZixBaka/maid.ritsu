@@ -1,8 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from tgbot.models.students import Student
-
 admin_menu_call_data = CallbackData("menu", "action")
 
 admin_menu = InlineKeyboardMarkup(inline_keyboard=[
@@ -84,12 +82,3 @@ confirmation_button = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text=""),
         InlineKeyboardButton(text="")]
 ])
-
-
-def start_chat_kb(driver_id):
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💬Start chat",
-                              callback_data=admin_driver_call_data.new(action="start_discussion", driver=driver_id))],
-        [InlineKeyboardButton(text='👁Hide', callback_data=admin_menu_call_data.new(action="hide"))]
-    ])
-    return keyboard
