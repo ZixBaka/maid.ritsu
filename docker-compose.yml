@@ -12,7 +12,7 @@ services:
       "host"
     restart: always
     env_file:
-      - ".env"
+      - ".env.dist"
     volumes:
       - .:/src
 
