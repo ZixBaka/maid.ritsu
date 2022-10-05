@@ -32,7 +32,7 @@ async def about_us(call: CallbackQuery):
                                  f"This bot exists thankfully for those who contributed\n"
                                  f"this <a href='https://github.com/mad-maids/maid.ritsu'>project</a>"
                                  f", and they are:\n\n"
-                                 f"👨‍💻<a href='https://github.com/Azizbek-B'>Azizbek</a> (Co-Creator, Maintainer)\n"
+                                 f"👨‍💻<a href='tg://user?id=698728556'>Azizbek</a> (Co-Creator, Maintainer)\n"
                                  f"🕵️‍♂<a href='https://t.me/muminovbob'>Bobomurod</a> (Co-Creator, Maintainer)\n"
                                  f"👩‍🚀<a href='https://github.com/uwussimo'>UwUssimo</a> (Core Contributor)\n\n"
                                  f"Copyright © 2022 <a href='https://github.com/mad-maids'>Mad Maids</a>",

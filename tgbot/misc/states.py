@@ -38,3 +38,5 @@ class Menu(StatesGroup):
 
     in_discussion_with_admin = State()
 
+    share_discussion = State()
+

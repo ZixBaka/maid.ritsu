@@ -4,7 +4,8 @@ from aiogram.types import Message, CallbackQuery
 
 from tgbot.config import Config
 from tgbot.keyboards.inline import found_driver_keyboard, car_callback, back_inline_car, feedback_keyboard, \
-    found_driver_keyboard_extra, on_my_way, on_my_way_extra, notify_callback, ignore_callback
+    found_driver_keyboard_extra, on_my_way, on_my_way_extra, notify_callback, ignore_callback, \
+    report_agreement_keyboard, discussion_finish_keyboard, report_agreement_callback_data, discussion_finish_call_data
 from tgbot.keyboards.admin_kb import admin_feedback_keyboard
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
@@ -16,7 +17,6 @@ from tgbot.misc.states import AdminStates
 # ============= FEEDBACK =====================
 async def feedback_discussion(msg: Message):
     config: Config = msg.bot.get("config")
-
     await msg.reply('Your message has been sent👍')
     await msg.bot.send_message(
         config.tg_bot.admins_group,
@@ -181,9 +181,9 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
         await state.storage.set_state(chat=car_owner.owner, user=car_owner.owner, state=Menu.start_chat.state)
         await state.storage.set_data(chat=car_owner.owner, user=car_owner.owner, data=dict(partner=call.from_user.id))
 
+        await state.update_data(dict(partner=car_owner.owner))
         await Menu.start_chat.set()
 
-        await state.update_data(dict(partner=car_owner.owner))
     except BotBlocked:
         await call.message.answer('Partner blocked this bot')
         await state.finish()
@@ -192,9 +192,19 @@ async def start_chatting(call: CallbackQuery, callback_data: dict, state: FSMCon
 async def send_message(msg: Message, state: FSMContext):
     data = await state.get_data()
     partner = data.get("partner")
+    discussion_content = data.get("discussion_content")
+    if discussion_content is None:
+        discussion_content = ""
+    txt_bubble = f"<a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a>" \
+                 f"[<code>{msg.from_user.id}</code>]:\n" \
+                 f"{msg.text}\n\n"
 
+    discussion_content += txt_bubble
     partner_state = await state.storage.get_state(chat=partner, user=partner)
     partner_data = await state.storage.get_data(chat=partner, user=partner)
+    await state.storage.update_data(chat=partner, user=partner,
+                                    data=dict(discussion_content=discussion_content))
+    await state.update_data(data=dict(discussion_content=discussion_content))
     if partner_state == Menu.start_chat.state:
         if partner_data.get("partner") == msg.from_user.id:
             await msg.bot.send_message(data.get("partner"),
@@ -211,13 +221,52 @@ async def send_message(msg: Message, state: FSMContext):
 
 async def finish(msg: Message, state: FSMContext):
     data = await state.get_data()
+
+    discussion_content = data.get("discussion_content")
     partner = data.get("partner")
-    await msg.bot.send_message(partner, "💬The dialogue was finished🛑")
+    await msg.bot.send_message(partner, "💬The dialogue was finished🛑",
+                               reply_markup=discussion_finish_keyboard)
     await state.storage.finish(chat=partner, user=partner)
 
-    await msg.answer('💬The dialogue was finished🛑')
-    await msg.delete()
+    await msg.answer('💬The dialogue was finished🛑',
+                     reply_markup=discussion_finish_keyboard)
+
+    await state.set_state(Menu.share_discussion.state)
+
+    await state.update_data(dict(discussion_content=discussion_content))
+    # await state.storage.update_data(chat=msg.chat.id, user=msg.from_user.id,
+    #                                 data=dict(discussion_content))
+    if discussion_content == "":
+        await msg.answer("There is no point to report -_-")
+        await state.finish()
+
+
+async def report(call: CallbackQuery):
+    await call.message.edit_text("<b>Discussion history will be sent to administrators to identify violations.\n"
+                                 "Do you agree?</b>", reply_markup=report_agreement_keyboard)
+
+
+async def close(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
     await state.finish()
+
+
+async def report_confirmation(call: CallbackQuery, callback_data: dict, state: FSMContext):
+    answer = callback_data.get("answer")
+    if answer == "yes":
+        await call.answer("Discussion forwarded to admins, they will contact you ASAP.")
+        config: Config = call.bot.get("config")
+        data = await state.get_data()
+        conversation = data.get("discussion_content")
+        print(conversation)
+        await call.bot.send_message(config.tg_bot.admins_group, text=conversation)
+    elif answer == "no":
+        await call.answer("You have decided no to report, discussion history is cleaned")
+
+    await call.message.delete()
+    await state.finish()
+
+
 
 
 # ============= ERRORS =====================
@@ -262,3 +311,9 @@ def discussion_handlers(dp: Dispatcher):
     dp.register_message_handler(search_owner, search_car=True, state=Menu.search_number)
     dp.register_callback_query_handler(stop_search, state=Menu.search_number, text='to_settings')
 
+    dp.register_callback_query_handler(report, discussion_finish_call_data.filter(),
+                                       state=Menu.share_discussion)
+    dp.register_callback_query_handler(close, discussion_finish_call_data.filter(),
+                                       state=Menu.share_discussion)
+    dp.register_callback_query_handler(report_confirmation, report_agreement_callback_data.filter(),
+                                       state=Menu.share_discussion)
