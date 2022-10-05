@@ -3,12 +3,13 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.dispatcher import FSMContext
 
 from tgbot.keyboards.inline import settings_keyboard, about_us_keyboard, \
-    main_menu_keyboard, feedback_keyboard_after
+    main_menu_keyboard, feedback_keyboard_after, report_keyboad
 from tgbot.misc.states import Menu
 from tgbot.models.cars import Car
 
 
-async def settings(call: CallbackQuery):
+async def settings(call: CallbackQuery, state: FSMContext):
+    await state.finish()
     await call.message.edit_text(
         "".join(["<b> In this section, you can manage</b>"
                  "<b> information that related to you.</b>"]),
@@ -31,7 +32,7 @@ async def about_us(call: CallbackQuery):
                                  f"This bot exists thankfully for those who contributed\n"
                                  f"this <a href='https://github.com/mad-maids/maid.ritsu'>project</a>"
                                  f", and they are:\n\n"
-                                 f"👨‍💻<a href='https://github.com/Azizbek-B'>Azizbek</a> (Co-Creator, Maintainer)\n"
+                                 f"👨‍💻<a href='tg://user?id=698728556'>Azizbek</a> (Co-Creator, Maintainer)\n"
                                  f"🕵️‍♂<a href='https://t.me/muminovbob'>Bobomurod</a> (Co-Creator, Maintainer)\n"
                                  f"👩‍🚀<a href='https://github.com/uwussimo'>UwUssimo</a> (Core Contributor)\n\n"
                                  f"Copyright © 2022 <a href='https://github.com/mad-maids'>Mad Maids</a>",
@@ -86,6 +87,12 @@ async def helper(msg: Message):
     await msg.answer(help_text)
 
 
+async def reporter(msg: Message):
+    text = "<code>If you have been faced on of the troubles below, \n" \
+           "please, choose related one and admins will do their best to solve it!</code>"
+    await msg.answer(text, reply_markup=report_keyboad)
+
+
 def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(settings, text="settings", in_db=True, call_is_private=True)
     dp.register_callback_query_handler(about_us, text="about", in_db=True, call_is_private=True)
@@ -94,3 +101,4 @@ def user_menu_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(exit_to_menu, text="back_to_menu", state=["*", "", None])
     dp.register_callback_query_handler(close_menu, text='hide_menu', in_db=True, call_is_private=True)
     dp.register_message_handler(helper, state=["*", ""], commands='help', in_db=True, is_private=True)
+    dp.register_message_handler(reporter, state=["*", ""], commands='report', in_db=True, is_private=True)

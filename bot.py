@@ -7,7 +7,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
-from tgbot.filters.car_in_db import CarInDB
+from tgbot.filters.car_in_db import CarInDB, HasCar
 from tgbot.filters.is_private import IsPrivate, CallIsPrivate
 from tgbot.filters.search_car import SearchCar
 from tgbot.filters.user_in_db import UserInDB, IsNotBanned
@@ -41,6 +41,7 @@ def register_all_filters(dp):
     dp.filters_factory.bind(SearchCar)
     dp.filters_factory.bind(IsValidCar)
     dp.filters_factory.bind(CallIsPrivate)
+    dp.filters_factory.bind(HasCar)
 
 
 def register_all_handlers(dp):

@@ -35,3 +35,22 @@ class CarInDB(BoundFilter):
                 return False
 
 
+class HasCar(BoundFilter):
+
+    key = "has_car"
+
+    def __init__(self, has_car: typing.Optional[bool] = key):
+        self.has_car = has_car
+
+    async def check(self, obj, *args):
+        if self.has_car is None:
+            return True
+        elif self.has_car is True:
+            session_maker = obj.bot.get('db')
+
+            car_owner: types.Message.from_user = obj.from_user
+            car = await Car.get_car_by_tg(session_maker, tg_id=car_owner.id)
+            if car is None:
+                return False
+            data = dict(car=car)
+            return data

@@ -7,6 +7,7 @@ class AdminStates(StatesGroup):
     search_car = State()
     search_driver = State()
     chat = State()
+    in_discussion_with_reporter = State()
 
 
 class RegisterUser(StatesGroup):
@@ -26,7 +27,6 @@ class Menu(StatesGroup):
     start_chat = State()
     in_discussion = State()
 
-    settings = State()
     car_settings = State()
     add_car = State()
     edit_car = State()
@@ -36,4 +36,7 @@ class Menu(StatesGroup):
     feedback = State()
     about_us = State()
 
+    in_discussion_with_admin = State()
+
+    share_discussion = State()
 

@@ -141,7 +141,7 @@ stolen_car_button = InlineKeyboardButton(
 )
 
 other_report_button = InlineKeyboardButton(
-    text="Report stolen car number",
+    text="Another issue",
     callback_data=report_callback_data.new(description="other", car="car")
 )
 report_keyboad = InlineKeyboardMarkup(resize_keyboard=True)
@@ -149,3 +149,25 @@ report_keyboad.add(stolen_car_button)
 report_keyboad.add(scam_button)
 report_keyboad.add(abuse_button)
 report_keyboad.add(other_report_button)
+
+report_agreement_callback_data = CallbackData("report_confirmation", "answer")
+
+report_agreement_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="Yes✅", callback_data=report_agreement_callback_data.new(answer="yes"))
+    ],
+    [
+        InlineKeyboardButton(text="No❌", callback_data=report_agreement_callback_data.new(answer="no"))
+    ]],
+    resize_keyboard=True)
+
+discussion_finish_call_data = CallbackData("finish_chat", "action")
+
+discussion_finish_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text="Report📣", callback_data=discussion_finish_call_data.new(action="report"))
+    ],
+    [
+        InlineKeyboardButton(text="Close🚫", callback_data=discussion_finish_call_data.new(action="close"))
+    ]],
+    resize_keyboard=True)

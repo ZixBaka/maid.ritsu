@@ -27,7 +27,8 @@ async def check_cars(call: CallbackQuery):
     await call.answer()
 
 
-async def cars_settings(call: CallbackQuery):
+async def cars_settings(call: CallbackQuery, state: FSMContext):
+    await state.finish()
     await call.message.edit_text("<b>Okay, what do you want to do with your cars?</b>")
     await call.message.edit_reply_markup(main_car_inline_keyboard)
     await call.answer()
@@ -49,10 +50,11 @@ async def insert_car_number(msg: Message, state: FSMContext):
     await state.finish()
 
 
-async def car_number_exist(msg: Message):
+async def car_number_exist(msg: Message, state: FSMContext):
     await msg.answer(
         "<b>Looks like your car number is already taken, please contact admin via /report if necessary</b>",
         reply_markup=main_car_inline_keyboard)
+    await state.finish()
 
 
 async def chosen_car_menu(call: CallbackQuery, callback_data: dict):
@@ -64,10 +66,11 @@ async def chosen_car_menu(call: CallbackQuery, callback_data: dict):
 
 async def delete_the_car(call: CallbackQuery, callback_data: dict):
     car_number = callback_data.get("number")
-    if await Car.get_car(call.bot.get("db"), car_number) is None:
+    car = await Car.get_car(call.bot.get("db"), car_number)
+    if car is None:
         await call.answer("🔴You don't own this car!", show_alert=True)
     else:
-        await Car.delete_car(call.bot.get("db"), car_number)
+        await car.update_status_by_order(call.bot.get("db"), order=car.car_order, status=dict(status=0))
         await call.answer('🟢Car was successfully deleted🗑', show_alert=True)
         await call.message.delete()
 
@@ -161,6 +164,7 @@ def user_settings_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(check_cars, car_callback.filter(method='hide'))
     dp.register_callback_query_handler(cars_settings, state=Menu.add_car, text='to_settings')
     dp.register_callback_query_handler(cars_settings, text='car_list_back')
+
     #  ============ PHONE ============
     dp.register_callback_query_handler(phone_settings, text='my_phone')
     dp.register_callback_query_handler(settings, text='close_phone')
