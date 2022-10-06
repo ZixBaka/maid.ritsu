@@ -17,7 +17,6 @@ admin_menu = InlineKeyboardMarkup(inline_keyboard=[
 
 admin_cars_call_data = CallbackData("menu", "action", "order")
 
-
 admin_driver_call_data = CallbackData("drivers", "action", "driver")
 
 

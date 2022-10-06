@@ -13,6 +13,7 @@ from tgbot.models.cars import Car
 from tgbot.models.students import Student
 from tgbot.misc.states import Menu
 
+
 async def admin_start(message: Message):
     await message.reply("Hello, admin!", reply_markup=admin_menu)
     await AdminStates.in_admin_panel.set()
@@ -128,7 +129,6 @@ async def unban_driver(call: CallbackQuery, callback_data: dict, state: FSMConte
 
 async def hide(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-
     if state != "":
         await state.finish()
 

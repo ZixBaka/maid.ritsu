@@ -44,7 +44,6 @@ def register_all_filters(dp):
     dp.filters_factory.bind(HasCar)
 
 
-
 def register_all_handlers(dp):
     error_handler(dp)
     discussion_handlers(dp)
