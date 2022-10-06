@@ -3,14 +3,6 @@ import asyncio
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
-<<<<<<< HEAD
-
-from tgbot.keyboards.admin_kb import admin_menu, admin_cars_keyboard, admin_menu_call_data, admin_cars_call_data, \
-    admin_drivers_keyboard, admin_driver_call_data
-from tgbot.misc.states import AdminStates
-from tgbot.models.cars import Car
-from tgbot.models.students import Student
-=======
 from aiogram.utils.exceptions import BotBlocked
 
 from tgbot.keyboards.admin_kb import admin_menu, admin_cars_keyboard, admin_menu_call_data, admin_cars_call_data, \
@@ -20,19 +12,13 @@ from tgbot.misc.states import AdminStates
 from tgbot.models.cars import Car
 from tgbot.models.students import Student
 from tgbot.misc.states import Menu
->>>>>>> pr/11
-
 
 async def admin_start(message: Message):
     await message.reply("Hello, admin!", reply_markup=admin_menu)
     await AdminStates.in_admin_panel.set()
 
 
-<<<<<<< HEAD
-async def send_chat(call: CallbackQuery, state: FSMContext):
-=======
 async def send_chat(call: CallbackQuery):
->>>>>>> pr/11
     await call.message.answer("telegram id is needed")
     await AdminStates.selecting_partner_for_chatting.set()
 
@@ -50,16 +36,6 @@ async def admin_cars(call: CallbackQuery):
     await AdminStates.search_car.set()
 
 
-<<<<<<< HEAD
-async def admin_find_car_number(msg: Message):
-    session_maker = msg.bot.get("db")
-    cars = await Car.get_cars(session_maker=session_maker, car_number=msg.text)
-    if len(cars )== 0:
-        await msg.answer("Looks like car with this number doesn't exist")
-    else:
-        for c in cars:
-            a = c.car_number
-=======
 async def admin_find_car_number(msg: Message, state: FSMContext):
     session_maker = msg.bot.get("db")
     cars = await Car.get_cars(session_maker=session_maker, car_number=msg.text)
@@ -67,22 +43,16 @@ async def admin_find_car_number(msg: Message, state: FSMContext):
         await msg.answer("Looks like car with this number doesn't exist")
     else:
         for c in cars:
->>>>>>> pr/11
             status = "enabled"
             if c.status == 0:
                 status = "disabled"
             await msg.answer(f'Order: {c.car_order}\n\n'
                              f'Car number: <code>{c.car_number}</code>\n\n'
                              f'Car owner id: <code>{c.owner}</code>\n\n'
-<<<<<<< HEAD
-                             f'Car status: <code>{status}</code>', reply_markup=admin_cars_keyboard(c.car_order))
-            await asyncio.sleep(0.3)
-=======
                              f'Car status: <code>{status}</code>',
                              reply_markup=admin_cars_keyboard(c.car_order, c.owner))
             await asyncio.sleep(0.3)
     await state.finish()
->>>>>>> pr/11
 
 
 async def disable_car(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -112,28 +82,6 @@ async def admin_drivers(call: CallbackQuery):
     await AdminStates.search_driver.set()
 
 
-<<<<<<< HEAD
-async def admin_find_driver(msg: Message):
-
-    student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
-    if student is None:
-        await msg.answer("Student with this id doesn't exist in our database")
-    else:
-        cars = await Car.get_all_by_tg(session_maker=msg.bot.get("db"), tg_id=student.tg_id)
-
-        status = "active"
-        if student.status == 0:
-            status = "banned"
-
-        car_nums = "\n\n"
-        for c in cars:
-            car_nums += "<code>" + str(c.car_order) + " " + c.car_number + "\n\n</code>"
-        await msg.answer(f'Student id: <code>{student.tg_id}</code>\n\n'
-                         f'Student first name: <code>{student.first_name}</code>\n\n'
-                         f'Student phone number: <code>{student.phone_number}</code>\n\n'
-                         f'Student status: <code>{status}</code>\n\n'
-                         f'Cars: {car_nums}', reply_markup=admin_drivers_keyboard(student.tg_id))
-=======
 async def admin_find_driver(msg: Message, state: FSMContext):
     try:
         student = await Student.get_any_student(session_maker=msg.bot.get("db"), tg_id=int(msg.text))
@@ -158,7 +106,6 @@ async def admin_find_driver(msg: Message, state: FSMContext):
             await state.finish()
     except ValueError:
         await msg.answer("It's not an ID bruh")
->>>>>>> pr/11
 
 
 async def ban_driver(call: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -181,11 +128,7 @@ async def unban_driver(call: CallbackQuery, callback_data: dict, state: FSMConte
 
 async def hide(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-<<<<<<< HEAD
 
-    if state != "":
-         await state.finish()
-=======
     if state != "":
         await state.finish()
 
@@ -230,16 +173,11 @@ async def discussion_with_reporter(msg: Message, state: FSMContext):
     except BotBlocked:
         await msg.reply("The bot blocked by user")
         await state.finish()
->>>>>>> pr/11
 
 
 def register_admin(dp: Dispatcher):
     dp.register_message_handler(admin_start, state=["*", ""], commands=["admin"], is_admin=True)
     # =======Chat======
-<<<<<<< HEAD
-
-
-=======
     dp.register_callback_query_handler(chat, admin_driver_call_data.filter(
         action=['start_discussion', "start_chat"]))
 
@@ -248,7 +186,6 @@ def register_admin(dp: Dispatcher):
 
     dp.register_message_handler(discussion_with_reporter, state=AdminStates.in_discussion_with_reporter)
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"))
->>>>>>> pr/11
     # =======Cars======
     dp.register_callback_query_handler(admin_cars, admin_menu_call_data.filter(action="find_car"),
                                        state=AdminStates.in_admin_panel, is_admin=True)
@@ -269,8 +206,3 @@ def register_admin(dp: Dispatcher):
     # ========Universal button=======
     dp.register_callback_query_handler(hide, admin_menu_call_data.filter(action="hide"), state=["*", ""],
                                        is_admin=True)
-<<<<<<< HEAD
-
-
-=======
->>>>>>> pr/11
