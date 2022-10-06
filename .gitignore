@@ -1,7 +1,8 @@
+
+.venv
 .idea
 .vsode
 venv
-.env
 user_data.db
 data
 .DS_Store

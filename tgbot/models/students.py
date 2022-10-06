@@ -1,4 +1,5 @@
-from sqlalchemy import Column, BigInteger, String, insert, select, update, SmallInteger, and_
+from sqlalchemy import Column, BigInteger, String, insert, select, update,\
+    SmallInteger, and_, delete
 from sqlalchemy.orm import sessionmaker
 
 from tgbot.services.db_base import Base
@@ -23,8 +24,8 @@ class Student(Base):
             return result
 
     @classmethod
-    async def get_student(cls, session_maker: sessionmaker,
-                          tg_id: int, status: int = 1) -> 'Student':
+    async def get_student(cls, session_maker: sessionmaker, tg_id: int, status: int = 1) -> 'Student':
+
         async with session_maker() as db_session:
             sql = select(cls).where(and_(cls.tg_id == tg_id, cls.status == status))
             request = await db_session.execute(sql)
@@ -50,6 +51,7 @@ class Student(Base):
             return result
 
     @classmethod
+<<<<<<< HEAD
     async def get_number_by_tg(cls, session_maker: sessionmaker,
                                tg_id: int, status: int = 1) -> 'Student':
         async with session_maker() as db_session:
@@ -60,6 +62,26 @@ class Student(Base):
             return number
 
     @classmethod
+=======
+    async def remove_student(cls, session_maker: sessionmaker, tg_id: int):
+        async with session_maker() as db_session:
+            sql = delete(Student).where(Student.tg_id == tg_id)
+            request = await db_session.execute(sql)
+            await db_session.commit()
+            return request
+
+    @classmethod
+    async def get_number_by_tg(cls, session_maker: sessionmaker,
+                               tg_id: int, status: int = 1) -> 'Student':
+        async with session_maker() as db_session:
+            sql = select(cls.phone_number).where(and_(cls.tg_id == tg_id, cls.status == status))
+            request = await db_session.execute(sql)
+            number: cls = request.scalar()
+            await db_session.commit()
+            return number
+
+    @classmethod
+>>>>>>> pr/11
     async def remove_number(cls, session_maker: sessionmaker, tg_id: int):
         async with session_maker() as db_session:
             sql = update(Student).where(Student.tg_id == tg_id).values(phone_number=None)
