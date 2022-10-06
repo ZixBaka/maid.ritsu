@@ -66,14 +66,12 @@ class Car(Base):
     @classmethod
     async def get_car_by_tg(cls, session_maker: sessionmaker,
                             tg_id: int, status: int = 1) -> 'Car':
-
         async with session_maker() as db_session:
             sql = select(cls).where(cls.owner == tg_id, cls.status == status)
             request = await db_session.execute(sql)
             car: cls = request.scalar()
             await db_session.commit()
             return car
-
 
     @classmethod
     async def get_all_active_by_tg(cls, session_maker: sessionmaker,
@@ -104,7 +102,6 @@ class Car(Base):
             cars: cls = request.scalars()
             await db_session.commit()
             return cars
-
 
     @classmethod
     async def get_all_by_number(cls, session_maker: sessionmaker,
@@ -166,40 +163,7 @@ class Car(Base):
     async def delete_car(cls, session_maker: sessionmaker,
                          car_number: str):
         async with session_maker() as db_session:
-            sql = delete(cls).where(and_(cls.owner == tg_id, cls.status == status))
-            request = await db_session.execute(sql)
+            sql = delete(cls).where(cls.car_number == car_number)
+            result = await db_session.execute(sql)
             await db_session.commit()
-<<<<<<< HEAD
-            return request
-
-    @classmethod
-    async def get_owner_by_car(cls, session_maker: sessionmaker,
-                               car_number: str, status: int = 1):
-        async with session_maker() as db_session:
-            sql = select(cls.owner).where(and_(cls.car_number == car_number, cls.status == status))
-            request = await db_session.execute(sql)
-            owner_id: cls = request.scalar()
-            await db_session.commit()
-            return owner_id
-
-    @staticmethod
-    async def update_status_by_order(session_maker: sessionmaker, order: int, status: dict):
-        async with session_maker() as db_session:
-            sql = update(Car).where(Car.car_order == order).values(**status)
-            request = await db_session.execute(sql)
-            await db_session.commit()
-            return request
-
-    @staticmethod
-    async def update_status(session_maker: sessionmaker,
-                            owner: int, car_number: str, status: dict):
-        async with session_maker() as db_session:
-            sql = update(Car).where(and_(Car.car_number == car_number,
-                                         Car.owner == owner)).values(**status)
-            request = await db_session.execute(sql)
-            await db_session.commit()
-            return request
-
-=======
             return result
->>>>>>> pr/11
