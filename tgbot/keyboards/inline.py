@@ -19,8 +19,6 @@ def found_driver_keyboard(car_number: str):
         [InlineKeyboardButton(text="💬Start chatting",
                               callback_data=car_callback.new(method="enter_room", number=car_number)),
          InlineKeyboardButton(text="◀Cancel",
-<<<<<<< HEAD
-=======
                               callback_data="cancel_chatting")]])
     return keyboard
 
@@ -30,7 +28,6 @@ def found_driver_keyboard_extra(car_number: str):
         [InlineKeyboardButton(text="💬Start chatting",
                               callback_data=car_callback.new(method="enter_room", number=car_number)),
          InlineKeyboardButton(text="◀Cancel",
->>>>>>> pr/11
                               callback_data="cancel_chatting")]])
     return keyboard
 

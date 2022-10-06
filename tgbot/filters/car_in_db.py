@@ -19,11 +19,7 @@ class CarInDB(BoundFilter):
         session_maker = obj.bot.get('db')
 
         car_number: types.Message.text = obj.text
-<<<<<<< HEAD
-        car = await Car.get_active_car(session_maker, car_number)
-=======
         car = await Car.get_active_car(session_maker, car_number.upper())
->>>>>>> pr/11
 
         data = dict(car=car)
         if car is None:

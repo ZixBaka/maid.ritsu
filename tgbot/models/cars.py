@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from typing import List
-
-=======
->>>>>>> pr/11
 from sqlalchemy import Column, String, insert, select, delete, SmallInteger, ForeignKey, and_, BigInteger, update
 from sqlalchemy.orm import sessionmaker
 
@@ -69,10 +64,6 @@ class Car(Base):
             return car
 
     @classmethod
-<<<<<<< HEAD
-    async def get_all_active_by_tg(cls, session_maker: sessionmaker,
-                                   tg_id: int, status: int = 1):
-=======
     async def get_car_by_tg(cls, session_maker: sessionmaker,
                             tg_id: int, status: int = 1) -> 'Car':
 
@@ -97,7 +88,6 @@ class Car(Base):
     @classmethod
     async def get_all_by_tg(cls, session_maker: sessionmaker,
                             tg_id: int, status: int = 1):
->>>>>>> pr/11
         async with session_maker() as db_session:
             sql = select(cls).where(cls.owner == tg_id, cls.status == status)
             request = await db_session.execute(sql)
@@ -138,8 +128,6 @@ class Car(Base):
 
     @classmethod
     async def delete_all_by_tg(cls, session_maker: sessionmaker, tg_id: int, status: int = 1):
-<<<<<<< HEAD
-=======
         async with session_maker() as db_session:
             sql = delete(cls).where(and_(cls.owner == tg_id, cls.status == status))
             request = await db_session.execute(sql)
@@ -177,7 +165,6 @@ class Car(Base):
     @classmethod
     async def delete_car(cls, session_maker: sessionmaker,
                          car_number: str):
->>>>>>> pr/11
         async with session_maker() as db_session:
             sql = delete(cls).where(and_(cls.owner == tg_id, cls.status == status))
             request = await db_session.execute(sql)

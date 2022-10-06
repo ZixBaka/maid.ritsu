@@ -17,12 +17,6 @@ from tgbot.misc.states import AdminStates
 # ============= FEEDBACK =====================
 async def feedback_discussion(msg: Message):
     config: Config = msg.bot.get("config")
-<<<<<<< HEAD
-    await msg.bot.send_message(
-        config.tg_bot.admins_group[0],
-        "".join([f"<b>From user: <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
-                 f"<i>{msg.text}</i>"],
-=======
     await msg.reply('Your message has been sent👍')
     await msg.bot.send_message(
         config.tg_bot.admins_group,
@@ -40,7 +34,6 @@ async def discussion_with_admin(msg: Message):
         "".join([f"<b>From user:\n [<code>{msg.from_user.id}</code>]\n"
                  f" <a href='tg://user?id={msg.from_user.id}'>{msg.from_user.first_name}</a></b>\n\n",
                  f"<i>{msg.text}</i>"]
->>>>>>> pr/11
                 ))
 
 
