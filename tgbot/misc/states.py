@@ -6,11 +6,8 @@ class AdminStates(StatesGroup):
     in_admin_panel = State()
     search_car = State()
     search_driver = State()
-<<<<<<< HEAD
-=======
     chat = State()
     in_discussion_with_reporter = State()
->>>>>>> pr/11
 
 
 class RegisterUser(StatesGroup):

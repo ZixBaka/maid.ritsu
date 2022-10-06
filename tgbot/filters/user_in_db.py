@@ -32,8 +32,6 @@ class UserInDB(BoundFilter):
                 return data
             elif self.in_db is False:
                 return False
-<<<<<<< HEAD
-=======
 
 
 class IsNotBanned(BoundFilter):
@@ -55,4 +53,3 @@ class IsNotBanned(BoundFilter):
             if student is not None:
                 return False
         return True
->>>>>>> pr/11
