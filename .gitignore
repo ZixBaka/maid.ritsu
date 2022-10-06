@@ -6,3 +6,6 @@ venv
 user_data.db
 data
 .DS_Store
+.env
+.gitignore
+.idea
